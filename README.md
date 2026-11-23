@@ -15,6 +15,29 @@ Agentic UAT is a two-skill methodology package for the AI-agent era of acceptanc
 
 **What it is not**: this is not a testing framework for agent harnesses, and not a unit-test generator. It is a *methodology* for letting AI agents do the walking of user-acceptance testing while humans keep judgment.
 
+### How the two skills work together
+
+```
+你只说意图              生成侧治理                     执行侧验收              闭环回灌
+"重点测 XX"  →  acceptance-contract-governance  →  simulated-user-acceptance  →  经验回项目侧
+              ├─ 四活源挖素材（PRD/台账/侦察/十一维）   ├─ persona 真实入口执行        （B 表变异假设、
+              ├─ 场景建模 + AC-ID 验收点表             ├─ UI 主证 + 受阻归因审计        fixtures/playbooks，
+              ├─ 自包含任务书（判据/手册/降级内嵌）      ├─ 三态报告（FINAL/FINAL-WITH-   新验收点递单回流
+              └─ 门槛标注（⛔挂台账/⏭️/⏸️）    ─────▶   GAPS/INTERIM）+ 产物树       ─────▶  下一轮生成侧）
+                   生成单 ≠ 执行单                          执行期只看本轮任务书+本轮实测
+```
+
+Division of labor (single source: `references/skill-interface.md` inside the governance skill):
+
+| Concern | Owner | Notes |
+|---|---|---|
+| 判据从哪来（test basis、AC-ID、覆盖度量口径） | governance | coverage-metrics.md is the only authority |
+| 产物长什么样（报告三态/产物树/证据命名） | execution | artifact-conventions.md is the only authority |
+| 执行期格式冲突 | execution wins | deviation logged and submitted for adjudication |
+| 生成单 vs 执行单 | strictly separated | generate-then-execute without review固化s unvetted depth into execution |
+
+Typical flow: state intent ("重点测 XX 模块 / 全项目深度测一遍") → governance skill produces the task book → any capable agent executes it book-in-hand under the execution skill's discipline → report lands in the artifact tree → lessons flow back to project-side knowledge. One sentence per side; the books carry everything else.
+
 ### Design tenets
 
 - Human-first judgment: real UI is the primary evidence entry; API is for test-data prep or machine personas only
@@ -49,7 +72,7 @@ git clone https://github.com/linjz3376/agentic-uat
 # add to opencode.json(c): "skills": ["/absolute/path/to/agentic-uat/skills"]
 ```
 
-Then invoke: "重点测 XX 模块" routes to the governance skill (task-book generation); executing the book routes to the execution skill. Any OpenCode-compatible agent host works.
+Then invoke: "重点测 XX 模块" routes to the governance skill (task-book generation); executing the book routes to the execution skill. Any AI execution agent with task-injection ability works — OpenCode, Claude Code, Codex, or your own harness.
 
 ### Repository layout
 
@@ -68,6 +91,12 @@ Agentic UAT 是 AI 智能体时代的验收测试双技能方法学包：
 - **simulated-user-acceptance**（v3.5.9）——以真实用户身份执行任务书：persona 端到端旅程、有界交互控制流、UI 主证、L1/L2/L3 覆盖、受阻归因审计（UNREACHABLE/OMITTED/DEFERRED/N-A）、三态报告、产物树闸门
 
 **不是什么**：不是测 agent 脚手架的框架，不是单测生成器——是「让 AI 执行体跑验收、人类只做裁判」的方法学。
+
+### 两技能如何协作
+
+分工总表（单源=governance 技能内 `references/skill-interface.md`）：**判据从哪来**（test basis/AC-ID/覆盖度量口径）归生成侧治理技能（coverage-metrics.md 唯一权威）；**产物长什么样**（报告三态/产物树/证据命名）归执行侧技能（artifact-conventions.md 唯一权威）；执行期格式冲突以执行侧为准并记偏差提交裁定；**生成单≠执行单**——只生成不执行、或不经评审直接执行，都会把未过闸的深度固化进执行。
+
+典型流程：你说一句意图（「重点测 XX 模块」/「全项目深度测一遍」）→ 治理技能产出自包含任务书（四活源素材+场景+AC-ID 验收点+门槛标注）→ 任意具备任务注入能力的执行体**拿着任务书**按执行侧纪律跑验收（persona 真实入口/UI 主证/受阻归因/三态报告）→ 报告落产物树 → 经验回灌项目侧知识库、新验收点递单回流生成侧。两侧各一句话即可触发，其余一切信息都在任务书内自包含。
 
 ### 安装
 
