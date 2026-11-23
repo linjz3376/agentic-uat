@@ -284,6 +284,10 @@ description 追加「造数通道盘点（三选一通道结论）」能力关�
   - **分层路由**：显式 `@skill-id` 规则优先；否则用 description + metadata.routing + overlay 做语义评分；阈值或 margin 不足时不注入，交回模型自选。
   - **overlay 机制**：内置技能不修改原文件，用 `~/.config/opencode/skill-router/overlays/*.json` 补充路由定义。
   - **评估与灰度**：新增 held-out 用例、accuracy/precision/coverage 指标、阈值 sweep、shadow/enforce 模式。
+## 1.5.23 执行到底协议（Stop-Gate）进两模板 §5 完成准则
+
+owner 2026-11-11 纠偏「任务书与技能都管不住半途停」：完成准则全绿前每回合末三件套（进度对账/断点/自唤醒排程）缺一=执行违规；条款标注执行侧出处 simulated-user-acceptance §1（同步其 3.3.22）。变更同步五件套：SKILL.md 正文+自检 #21+两模板+changelog 四件已落，references/self-check-gates 无涉。
+
 ## 1.4.0（2026-10-27，路由规则内化为技能自描述）：
   - **description / metadata.routing 即路由规则**：技能自己声明适用意图（generate/revise/govern/audit/plan）、产物（acceptance-contract/test-task-book/test-plan/coverage-report）、正向线索与排除线索；全局路由器不再写死任何技能名或触发正则。
   - **生成/执行分流**：`生成 / 编写 / 出一份 / 修订 / 治理 / 体检` 等意图与 `任务书 / 验收契约 / 测试计划 / 覆盖` 等产物词共同计分；`执行任务书 / 按任务书执行 / 跑一遍` 等执行语作为负向线索，避免把执行请求误判为生成。
@@ -295,12 +299,5 @@ description 追加「造数通道盘点（三选一通道结论）」能力关�
   - **新增机验**：self-check-gates §14 入口标签覆盖（无标签/双标签即失败）、§15 BLOCKED/⏭️ 通道结论；附 PowerShell 等价。
   - **模板同步**：块级与全域模板的操作列首令牌、§2 造数通道行、执行者手册「机器入口按契约断言」。
   - **实证**：2026-10-27 全域 UAT 中，生成期把「无 UI 入口」的能力当成不可验、执行期又以「无造数通道」误判 5 点 BLOCKED；实际存在 `historical-commit`、抽样计划、报销占用等写接口，补跑后 3 点转 PASS、1 点转 PARTIAL、1 点转 FAIL（BLOCKED 71→66）。同批还出现「无凭据 200、错误 body 400、重复上传 201」三类语义被同一 200 判据混同，故补契约断言要求。
-## 1.3.2
-
-明确治理体检分级和监控/质量职责边界。
-
-
-## 1.5.23：执行到底协议（Stop-Gate）进两模板 §5 完成准则（owner 2026-11-11 纠偏「任务书与技能都管不住半途停」）——完成准则全绿前每回合末三件套（进度对账/断点/自唤醒排程）缺一=执行违规；条款标注执行侧出处 simulated-user-acceptance §1（同步其 3.3.22）。变更同步五件套：SKILL.md 正文+自检 #21+两模板+changelog 四件已落，references/self-check-gates 无涉。
-
-（本条已归位至顶部并修正引用号为 @3.3.31，底部副本删除——并行会话追加错位勘误见 1.5.25 条目）
+## 1.3.2 明确治理体检分级和监控/质量职责边界。
 
