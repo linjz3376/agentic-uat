@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 > 1.4.5 起技能本体不再提供可执行脚本；以下历史条目中的 `check_ac_provenance.py` 仅作变更留痕，不再随技能分发。
 > 常驻规则：落笔新条目时同步步进 SKILL.md frontmatter `metadata.version`（== 本文件顶部条目号；1.5.22 起生效，frontmatter 1.5.19→1.5.22 补齐 1.5.20/1.5.21 欠账）。
@@ -7,6 +7,9 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.5.34 frontmatter 净化批
+
+owner 2026-11-23 令「深度优化 formatter——冗余、不相干、可读性差」。三刀：① 去 UTF-8 BOM（GitHub 文件视图不把头部识别为 YAML frontmatter、整段塌成一段粗体长文的根因——BOM 使 `---` 不在字节 0；源出 PowerShell Set-Content UTF8 写盘习惯，同步脚本已改无 BOM 写入）② cues 18→11：删内部黑话（四活源/自检闸/需求归宿/覆盖对账/覆盖矩阵——用户零命中率）与近义重复（测试指令/验收点表被短形态覆盖）；「模拟用户验收任务书」初裁后回摆恢复——它是 hard-negative 专证据（「生成一份模拟用户验收任务书」无它即 margin 不足 abstain，长形态 cue 承载的是词组级专证据，短形态覆盖不了）③ exclude 与 negative_examples 双名单合一（同用途双源=漂移温床），负例按「执行路由归执行侧/技能自身治理隔离/域外」三组带 YAML 注释归并；「执行这份任务书」初裁后回摆恢复（heldout 显式否定用例靠它拒识）。验证=路由 eval 前后对照：初裁暴露 2 例回归、回摆后 train 36/36 + heldout 16/16 全绿零误判，与基线一致。simulated 侧仅同批去 BOM，内容与版本不动。
 ## 1.5.33 载体中立化批
 
 （owner 2026-11-23 令，随 agentic-uat 发布链）。
