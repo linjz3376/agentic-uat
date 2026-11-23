@@ -18,7 +18,15 @@
     "opencode",
     "opencode-plugin",
     "skills",
-    "ai-testing"
+    "ai-testing",
+    "claude-code",
+    "codex",
+    "gemini-cli",
+    "cursor-agent",
+    "github-copilot",
+    "openclaw",
+    "hermes-agent",
+    "workbuddy"
   ],
   "files": [
     "skills",

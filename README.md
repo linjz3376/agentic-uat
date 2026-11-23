@@ -38,6 +38,25 @@ Division of labor (single source: `references/skill-interface.md` inside the gov
 
 Typical flow: state intent ("重点测 XX 模块 / 全项目深度测一遍") → governance skill produces the task book → any capable agent executes it book-in-hand under the execution skill's discipline → report lands in the artifact tree → lessons flow back to project-side knowledge. One sentence per side; the books carry everything else.
 
+### Compatible execution carriers
+
+The skills make three hard requirements of the execution agent — any harness meeting them is a legal carrier:
+
+1. **Task injection**: accepts a task text non-interactively (CLI headless mode / session API / script interface), so windows and triggers can fire on schedule
+2. **Environment reach**: file-system read/write for the artifact tree, plus at least one UI-driving channel (browser automation, desktop input, or delegated human operation)
+3. **Bounded loop**: honors the interaction control flow (fresh observation → authoritative verification → retry ladder → hard budget) instead of free-running
+
+| Carrier | Carrier form | Status |
+|---|---|---|
+| OpenCode | native skills discovery + `opencode run` headless | ✅ verified (the methodology's home carrier) |
+| Claude Code | `claude -p` headless + skills + computer use | architecture-compatible, community reports welcome |
+| Codex CLI / ChatGPT | non-interactive exec mode | architecture-compatible |
+| Gemini CLI | headless print mode | architecture-compatible |
+| Cursor / Copilot (VS Code) | agent mode + async coding agent | architecture-compatible (partial: weaker task-injection, use window-package triggers) |
+| OpenClaw / WorkBuddy / Hermes Agent | host agents with CLI/gateway entry | architecture-compatible |
+
+> Honesty note: carriers beyond OpenCode are *architecture-level* compatibility (the three requirements are met on paper) — not battle-tested. First real runs on a new carrier may surface carrier-specific SOP additions; contribute them back as project-side playbooks.
+
 ### Design tenets
 
 - Human-first judgment: real UI is the primary evidence entry; API is for test-data prep or machine personas only
@@ -97,6 +116,12 @@ Agentic UAT 是 AI 智能体时代的验收测试双技能方法学包：
 分工总表（单源=governance 技能内 `references/skill-interface.md`）：**判据从哪来**（test basis/AC-ID/覆盖度量口径）归生成侧治理技能（coverage-metrics.md 唯一权威）；**产物长什么样**（报告三态/产物树/证据命名）归执行侧技能（artifact-conventions.md 唯一权威）；执行期格式冲突以执行侧为准并记偏差提交裁定；**生成单≠执行单**——只生成不执行、或不经评审直接执行，都会把未过闸的深度固化进执行。
 
 典型流程：你说一句意图（「重点测 XX 模块」/「全项目深度测一遍」）→ 治理技能产出自包含任务书（四活源素材+场景+AC-ID 验收点+门槛标注）→ 任意具备任务注入能力的执行体**拿着任务书**按执行侧纪律跑验收（persona 真实入口/UI 主证/受阻归因/三态报告）→ 报告落产物树 → 经验回灌项目侧知识库、新验收点递单回流生成侧。两侧各一句话即可触发，其余一切信息都在任务书内自包含。
+
+### 兼容执行载体
+
+技能对执行体只有三项硬需求——任一 harness 满足即合法载体：①**任务注入**（CLI headless/会话 API/脚本接口，窗口与触发器才能到点自动执行）②**环境可达**（文件系统读写产物树+至少一条 UI 驱动通道）③**有界循环**（遵守交互控制流：新鲜感知→权威求证→重试阶梯→硬预算）。
+
+已盘点的主流 harness（Claude Code / Codex / Gemini CLI / Cursor / Copilot / OpenClaw / WorkBuddy / Hermes Agent）在架构层全部满足；其中 **OpenCode 为已实证载体**（技能原生发现+headless 注入），其余为架构兼容待实测——首例真跑发现的载体专属规程，欢迎作为项目侧 playbook 回灌。
 
 ### 安装
 
