@@ -1,0 +1,34 @@
+{
+  "name": "@linjz/agentic-uat",
+  "version": "1.0.0",
+  "description": "UAT by AI agents — two portable skills (acceptance-contract-governance + simulated-user-acceptance) that let AI execution agents run user-acceptance testing while humans keep judgment. Not a harness-testing framework.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "agentic-uat",
+    "agentic-testing",
+    "ai-agent-testing",
+    "uat",
+    "acceptance-testing",
+    "user-acceptance-testing",
+    "qa",
+    "test-plan",
+    "acceptance-contract",
+    "simulated-user-testing",
+    "opencode",
+    "opencode-plugin",
+    "skills",
+    "ai-testing"
+  ],
+  "files": [
+    "skills",
+    "catalog",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linjz3376/agentic-uat"
+  },
+  "homepage": "https://github.com/linjz3376/agentic-uat"
+}
