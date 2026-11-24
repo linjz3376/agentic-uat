@@ -42,5 +42,5 @@
 
 ## 指针
 
-- 项目实例层（当期工具面单源，含检索时点声明）：项目仓库 `docs/playbooks/`（01 浏览器 / 02 Windows 桌面 / 03 跨机 / 04-05 Windows 远程 / 06 macOS 桌面 / 07 Linux 桌面）。
+- 项目侧 playbook 层（不随技能分发的资产，需项目自备）：技能期待项目按载体维护 playbook 集——浏览器 / Windows 桌面 / 跨机（WinRM·计划任务类通道）/ Windows 远程（RDP 与无 RDP 两式）/ macOS 桌面 / Linux 桌面六类；每篇必含：接入方式 → 正常工作流 → 失效模式与处置 → 检索时点声明（工具面为易变事实，须带取证日期）。项目缺失对应 playbook 时按 `tool-selection.md` 降级链记「载体未备 playbook+降级路径」，不得虚构已有通道。
 - 选型判据：`tool-selection.md`；拟人纪律：SKILL §2 六条。
