@@ -7,6 +7,9 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.5.36 routing 凝聚批（精读测试历史定稿）
+
+owner 2026-11-24 令「精读 opencode-qqbot 测试历史工作，总结凝聚 routing」。取证面：tests/plans/qqbot-uat-2026-11-11.md（全域任务书 130 点）+ reports/TEST-STATUS-OVERALL.md（全域/战役/回归/复验四轮）+ final-report.md（FINAL-WITH-GAPS 签署）+ owner 历史指令语料（全项目质量收口/全域 UAT/够不够全/能验尽验）。定稿：① examples 五例按真实使用模式归位——全域生成（全项目 UAT 任务书）/块级生成（给模块安排测试任务）/修订补覆盖/完整性背书（验收点够不够全）/契约治理（体检与历史污染清理），不再只列生成类两例；② cues 14 词=上批 11 词 + 任务指令（全域任务书标题原词「任务指令」）+ 深度测试/全面测试（owner 提供语料，与既有「全面深度测」并存覆盖自然表述差异），「模拟用户验收任务书」专证据保留不动；③ intents/artifacts/negative_examples 不动（已证绿）。eval 复测 train36+heldout16 零误判。
 ## 1.5.35 标签平铺定稿批
 
 owner 2026-11-24 裁定：metadata.hermes 嵌套层退役，tags/category 平铺至 metadata 层——嵌套系发布期自定义约定而非官方标准，平铺更通用且与 simulated 侧形态一致（消除两技能 frontmatter 双形态）。category 采纳 owner 提议的数组形态并微调：[qa, uat, test-plan]（质量域/验收方法/任务书产物三面；owner 原拟含 plan，以与 test-plan 近义且有「项目规划」歧义为由剔除，保留回退口径一句）。tags 原样 [qa, uat, acceptance, contract, test-plan, governance]。description 与 routing 未动，路由零影响（eval 复测全绿）。
