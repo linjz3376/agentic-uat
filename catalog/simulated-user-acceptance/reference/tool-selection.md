@@ -111,6 +111,22 @@
 
 ---
 
+## 4.5 工具名示例（生态检索锚点，非限定清单）
+
+> 用途：给执行者一个「按名字能找到」的起点——以下名字来自本技能方法论的实战复盘与公开生态，**是示例不是清单**；选型仍须过 §1 最低能力清单与 §2 选型三问，名字本身不构成合格证据。时效声明：工具名/版本/星数随生态快速漂移（本节为 2026-11 检索时点快照），**使用前以各官方仓库现行文档为准并跑最小探针**。
+
+- **浏览器（DOM 通道）**：Playwright MCP（Microsoft 官方，`browser_snapshot` 带元素 ref）、browser-use（网页→LLM 友好结构化表示）、执行环境内置 browser 工具组（如 OpenCode 桌面内置，开箱免配）。
+- **Windows 桌面·辅助树**：Windows-MCP（CursorTouch，UIA 控件树 snapshot+按标签点击）；同类可选 FlaUI-MCP、desk-mcp。视觉兜底=computer use（截图+视觉模型猜坐标，仅 UIA 不可用时启用）。
+- **跨机桌面（A 驱动 B）**：QuickDesk（host 被控端捕获+client 主控端连接+`quickdesk-mcp` 桥接，Chromium Remoting/WebRTC 远程画面）。
+- **Windows 远程管理**：WinRM（系统原生远程管理通道，配计划任务链投递交互式任务——直发命令落非交互会话时，交互式 GUI 拉起须走计划任务）。
+- **macOS 桌面**：Accessibility API（AXUIElement，系统级控件树）、AppleScript/JXA（应用级流程脚本）；MCP 选型面如 axterminator（Rust，多工具）、computer-use 系框架（AX 优先、视觉兜底）。
+- **Linux 桌面**：AT-SPI（at-spi2-core，语义控件树）；输入合成=X11 用 xdotool/XTEST、Wayland 用 ydotool（/dev/uinput）；截图=X11 用 import、Wayland 用 grim 或 XDG portal；MCP 选型面如 computer-use-linux。
+- **坐标+剪贴板通道（裸树/自绘 UI）**：系统键鼠事件（SendInput 级）+剪贴板读写+物理分辨率截屏——通道能力要求见 §1.3，不以具体库名为判据。
+
+**示例使用纪律**：①先按入口类型定位到上表某一类，再用名字检索官方仓库；②安装后先跑最小探针（打开目标应用→读一次树/截一次图→一次真实操作并回读），探针不过即按 §4 降级链换通道；③未实弹验证的类别（macOS/Linux 桌面）在任务书里标「桌面调研级，首次使用前须探针」，禁止当已验证通道引用。
+
+---
+
 ## 5 删除阀登记（新增文件两问）
 
 1. **替代/废弃了什么**：纯增量。不替代 §1 六纪律（行为要求）与 §2 拟人操作执行规程（操作层细则）；本文件只占「驱动器选型判据」这个原空白的层位。适用边界=仅执行期选型与执行者手册引用，不改判定口径、不加新闸。
