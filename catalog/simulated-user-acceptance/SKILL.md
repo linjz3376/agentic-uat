@@ -3,9 +3,10 @@ name: simulated-user-acceptance
 description: "Use when executing simulated user acceptance (UAT), persona-based end-to-end journeys, or organizing acceptance evidence and reports. Enforces entry fidelity: real UI is the primary judgment entry; API is used only for test data preparation, pre-declared auxiliary verification, or machine personas/external systems without UI. Execution runs on a bounded interaction control flow (fresh-perception contract, authoritative-layer verification, progress-proof retry ladder, intent binding, hard budget). Covers browser/Playwright/manual UI, scenario-first execution with risk priority, UI-primary evidence, L1/L2/L3 coverage, boundary derivation, blocked-attribution auditing (UNREACHABLE/OMITTED/DEFERRED/N-A) with retest pull-up, three-state reporting, artifact-tree gates, and machine-computed coverage metrics."
 license: MIT
 metadata:
-  version: "3.5.9"
+  version: "3.5.10"
+  author: "linjz"
   platforms: "linux, macos, windows"
-  category: qa
+  category: [qa, uat, execution]
   tags: [uat, simulated-user, e2e, acceptance, boundary, risk-based]
   routing:
     intents: [execute, verify, uat, explore]
@@ -15,14 +16,14 @@ metadata:
       - 按任务书跑一遍，记录用户可见结果
       - 用 persona 走一遍业务流程，保留截图和证据
       - 验证不同角色的权限边界
+      - 复验已修缺陷并回写台账
+      - 未触项归因与三态收官
     cues:
       - 模拟用户
-      - 扮演用户
       - 真实用户
       - persona
       - 端到端
       - 业务旅程
-      - 用户旅程
       - 按任务书执行
       - 执行任务书
       - 跑任务书
@@ -34,21 +35,18 @@ metadata:
       - 截图
       - 证据
       - 未触
-      - 覆盖矩阵
       - 用户可见
       - 缺陷
       - 任务书
     negative_examples:
+      # 生成/修订/治理路由归 acceptance-contract-governance——本技能只管执行
       - 生成一份 UAT 任务书
-      - 修订任务书并补齐覆盖
-      - 验收契约体检
-      - 翻译成英文
-    exclude:
-      - 生成任务书
       - 编写任务书
       - 修订任务书
       - 治理任务书
       - 验收契约体检
+      # 域外请求
+      - 翻译成英文
 ---
 
 # 模拟用户验收
