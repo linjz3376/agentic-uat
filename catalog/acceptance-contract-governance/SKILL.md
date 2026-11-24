@@ -3,7 +3,7 @@ name: acceptance-contract-governance
 description: "Use when 交付物是测试验收文档：验收点表（AC-ID 化）、测试任务书（块级/全域）、验收契约及其覆盖对账（test basis 四活源、需求归宿四桶）、验收契约治理（29119-3 拆分、历史污染清理）。范围路由：模块名→块级任务书；全项目/全域/全流程→全域轮。"
 license: MIT
 metadata:
-  version: "1.5.36"
+  version: "1.5.37"
   author: "qa"
   platforms: "linux, macos, windows"
   tags: [qa, uat, acceptance, contract, test-plan, governance]
@@ -12,14 +12,14 @@ metadata:
     intents: [generate, revise]
     artifacts: [acceptance-contract, test-task-book, test-plan, coverage-report]
     examples:
-      - 生成一份全项目 UAT 任务书（全域轮）
+      - 生成一份全项目测试任务书（全域轮）
+      - 生成模拟用户验收任务书
       - 给这个模块安排测试任务（块级）
       - 修订现有任务书并补齐覆盖
       - 这份任务书的验收点够不够全
       - 验收契约体检与历史污染清理
     cues:
       - 任务书
-      - 模拟用户验收任务书
       - 任务指令
       - 测试计划
       - 测试任务
@@ -28,29 +28,22 @@ metadata:
       - UAT
       - 全域
       - 够不够全
-      - 全面深度测
       - 深度测试
       - 全面测试
       - 缺陷台账
     negative_examples:
       # 执行路由归 simulated-user-acceptance——本技能只管生成与治理
+      #（执行这份任务书/跑一遍=eval 实证专证据，不可裁）
       - 执行任务书
       - 执行这份任务书
       - 按任务书执行
       - 跑任务书
       - 跑一遍
-      - 跑一下
       - 返回执行结果
       # 技能自身治理话题不注入（评审隔离）
       - 修订技能
-      - 技能修订
-      - 技能优化
       - 技能评审
-      - 插件配置
-      # 域外请求
-      - 生成一份项目周报
-      - 清理历史文件
-      - 审计这段代码
+      # 域外请求（翻译成英文=heldout 实证专证据，不可裁）
       - 翻译成英文
 ---
 
