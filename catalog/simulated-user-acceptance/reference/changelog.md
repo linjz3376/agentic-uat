@@ -6,6 +6,9 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 3.5.11 表格模板渲染修复+文案批
+
+owner 2026-11-24 双指令：① examples/negative_examples 措辞统一「测试任务书」（执行这份测试任务书并返回结果 / 生成一份测试任务书，原 UAT 任务书）；② 表格模板渲染病灶——未触清单/补测任务单/审计记录三模板原以 `markdown 围栏包裹，GFM 在围栏内不渲染表格（截图所见「挤成一段文本」实态=代码块原文，非列数失配），统一缺陷库模板同病，四处围栏全拆使模板以真表格渲染；举一反三机扫两技能 95 表列数零失配（佐证非列病）、另拆 exception-baseline 单行模板围栏一处（归 ACG 1.5.39 同批），bash 代码块内管道属真代码保留。GitHub markdown API 实证：artifact-conventions 10 表 60 行、defect-classification 9 表 30 行、exception-baseline 1 表全部出表。
 ## 3.5.10 frontmatter 同步梳理批（举一反三）
 
 owner 2026-11-24 令「author 改 linjz + 举一反三同步深度梳理」。五笔：① metadata 补 author=linjz、category 由 qa 单值改 [qa, uat, execution] 三面（与 ACG 风格一致，execution=执行侧角色定位）；② cues 21→18：删扮演用户/用户旅程/覆盖矩阵（无实证近义词——「真实用户」为 exec-uat 用例实证专证据保留、「业务旅程」为正文灵魂判据原词保留）；③ examples 4→6：补「复验已修缺陷并回写台账」「未触项归因与三态收官」（复验轮/收官轮真实模式）；④ exclude 与 negative_examples 双名单合一（ACG 同款冗余，「验收契约体检」原双列重复），合并为 6 条并带分组注释（生成/修订/治理归 ACG + 域外）；⑤ description/intents/artifacts 未动。eval 复测 train36+heldout16 零回归。
