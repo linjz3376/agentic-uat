@@ -1,45 +1,45 @@
-﻿{
-    "skills":  [
-                   {
-                       "files":  [
-                                     "references/ac-id-rules.md",
-                                     "references/changelog.md",
-                                     "references/coverage-metrics.md",
-                                     "references/exception-baseline.md",
-                                     "references/executable-standards.md",
-                                     "references/gate-samples/negative-book.md",
-                                     "references/gate-samples/negative-report.md",
-                                     "references/gate-samples/positive-book.md",
-                                     "references/gate-samples/positive-report.md",
-                                     "references/pitfalls.md",
-                                     "references/pollution-taxonomy.md",
-                                     "references/provenance-gate.md",
-                                     "references/self-check-gates.md",
-                                     "references/skill-interface.md",
-                                     "references/source-reconciliation.md",
-                                     "references/test-depth-dimensions.md",
-                                     "SKILL.md",
-                                     "templates/project-instruction.md",
-                                     "templates/project-skeleton.md",
-                                     "templates/task-instruction.md"
-                                 ],
-                       "name":  "acceptance-contract-governance",
-                       "version":  "1.5.33"
-                   },
-                   {
-                       "files":  [
-                                     "reference/artifact-conventions.md",
-                                     "reference/boundary-derivation.md",
-                                     "reference/changelog.md",
-                                     "reference/defect-classification.md",
-                                     "reference/gui-tui-cli.md",
-                                     "reference/method-coverage.md",
-                                     "reference/runbook.md",
-                                     "reference/tool-selection.md",
-                                     "SKILL.md"
-                                 ],
-                       "name":  "simulated-user-acceptance",
-                       "version":  "3.5.9"
-                   }
-               ]
+{
+  "skills": [
+    {
+      "files": [
+        "references/ac-id-rules.md",
+        "references/changelog.md",
+        "references/coverage-metrics.md",
+        "references/exception-baseline.md",
+        "references/executable-standards.md",
+        "references/gate-samples/negative-book.md",
+        "references/gate-samples/negative-report.md",
+        "references/gate-samples/positive-book.md",
+        "references/gate-samples/positive-report.md",
+        "references/pitfalls.md",
+        "references/pollution-taxonomy.md",
+        "references/provenance-gate.md",
+        "references/self-check-gates.md",
+        "references/skill-interface.md",
+        "references/source-reconciliation.md",
+        "references/test-depth-dimensions.md",
+        "SKILL.md",
+        "templates/project-instruction.md",
+        "templates/project-skeleton.md",
+        "templates/task-instruction.md"
+      ],
+      "name": "acceptance-contract-governance",
+      "version": "1.6.0"
+    },
+    {
+      "files": [
+        "reference/artifact-conventions.md",
+        "reference/boundary-derivation.md",
+        "reference/changelog.md",
+        "reference/defect-classification.md",
+        "reference/gui-tui-cli.md",
+        "reference/method-coverage.md",
+        "reference/runbook.md",
+        "reference/tool-selection.md",
+        "SKILL.md"
+      ],
+      "name": "simulated-user-acceptance",
+      "version": "3.6.0"
+    }
+  ]
 }
