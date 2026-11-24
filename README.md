@@ -10,8 +10,8 @@
 
 Agentic UAT is a two-skill methodology package for the AI-agent era of acceptance testing:
 
-- **acceptance-contract-governance** (v1.5.33) — turns "test feature X thoroughly" into a self-contained, executable acceptance-instruction document: AC-ID'd verification points with entry paths (`[UI]`/`[MACHINE]`), scenario modeling, four live sources of test basis (PRD cross-cut + defect ledger + live UI/endpoint recon + eleven-dimension depth drill), machine-checkable coverage metrics, and a final-report gate.
-- **simulated-user-acceptance** (v3.5.9) — executes those instructions as real users: persona-based end-to-end journeys, bounded interaction control flow, UI-primary evidence, L1/L2/L3 coverage, blocked-attribution auditing (UNREACHABLE/OMITTED/DEFERRED/N-A), three-state reporting (FINAL / FINAL-WITH-GAPS / INTERIM), and artifact-tree gates.
+- **acceptance-contract-governance** (v1.6.0) — turns "test feature X thoroughly" into a self-contained, executable acceptance-instruction document: AC-ID'd verification points with entry paths (`[UI]`/`[MACHINE]`), scenario modeling, four live sources of test basis (PRD cross-cut + defect ledger + live UI/endpoint recon + eleven-dimension depth drill), machine-checkable coverage metrics, and a final-report gate.
+- **simulated-user-acceptance** (v3.6.0) — executes those instructions as real users: persona-based end-to-end journeys, bounded interaction control flow, UI-primary evidence, L1/L2/L3 coverage, blocked-attribution auditing (UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED), three-state reporting (FINAL / FINAL-WITH-GAPS / INTERIM), and artifact-tree gates.
 
 **What it is not**: this is not a testing framework for agent harnesses, and not a unit-test generator. It is a *methodology* for letting AI agents do the walking of user-acceptance testing while humans keep judgment.
 
@@ -33,7 +33,7 @@ Division of labor (single source: `references/skill-interface.md` inside the gov
 |---|---|---|
 | 判据从哪来（test basis、AC-ID、覆盖度量口径） | governance | coverage-metrics.md is the only authority |
 | 产物长什么样（报告三态/产物树/证据命名） | execution | artifact-conventions.md is the only authority |
-| 执行期格式冲突 | execution wins | deviation logged and submitted for adjudication |
+| 执行期规范 | frozen task-book snapshot | no live skill-version switching; stricter host safety rules always win |
 | 生成单 vs 执行单 | strictly separated | generate-then-execute without review固化s unvetted depth into execution |
 
 Typical flow: state intent ("重点测 XX 模块 / 全项目深度测一遍") → governance skill produces the task book → any capable agent executes it book-in-hand under the execution skill's discipline → report lands in the artifact tree → lessons flow back to project-side knowledge. One sentence per side; the books carry everything else.
@@ -100,20 +100,20 @@ skills/   the two skills (directory form, portable)
 catalog/  HTTP catalog (index.json + per-skill files) for Route A
 ```
 
-Skill versions inside this package: acceptance-contract-governance 1.5.33, simulated-user-acceptance 3.5.9. Package semver tracks the bundle; skill changelogs carry their own history.
+Skill versions inside this package: acceptance-contract-governance 1.6.0, simulated-user-acceptance 3.6.0. Package semver tracks the bundle; skill changelogs carry their own history.
 
 ## 中文
 
 Agentic UAT 是 AI 智能体时代的验收测试双技能方法学包：
 
-- **acceptance-contract-governance**（v1.5.33）——把「重点测 XX」变成自包含可执行的验收任务书：AC-ID 化验证点（带 `[UI]`/`[MACHINE]` 入口判定路径）、场景建模、test basis 四活源（PRD 横切+缺陷台账+现行侦察+十一维加钻）、机验覆盖度量、收官闸
-- **simulated-user-acceptance**（v3.5.9）——以真实用户身份执行任务书：persona 端到端旅程、有界交互控制流、UI 主证、L1/L2/L3 覆盖、受阻归因审计（UNREACHABLE/OMITTED/DEFERRED/N-A）、三态报告、产物树闸门
+- **acceptance-contract-governance**（v1.6.0）——把「重点测 XX」变成自包含可执行的验收任务书：AC-ID 化验证点（带 `[UI]`/`[MACHINE]` 入口判定路径）、场景建模、test basis 四活源（PRD 横切+缺陷台账+现行侦察+十一维加钻）、机验覆盖度量、收官闸
+- **simulated-user-acceptance**（v3.6.0）——以真实用户身份执行任务书：persona 端到端旅程、有界交互控制流、UI 主证、L1/L2/L3 覆盖、受阻归因审计（UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED）、三态报告、产物树闸门
 
 **不是什么**：不是测 agent 脚手架的框架，不是单测生成器——是「让 AI 执行体跑验收、人类只做裁判」的方法学。
 
 ### 两技能如何协作
 
-分工总表（单源=governance 技能内 `references/skill-interface.md`）：**判据从哪来**（test basis/AC-ID/覆盖度量口径）归生成侧治理技能（coverage-metrics.md 唯一权威）；**产物长什么样**（报告三态/产物树/证据命名）归执行侧技能（artifact-conventions.md 唯一权威）；执行期格式冲突以执行侧为准并记偏差提交裁定；**生成单≠执行单**——只生成不执行、或不经评审直接执行，都会把未过闸的深度固化进执行。
+分工总表（单源=governance 技能内 `references/skill-interface.md`）：**判据从哪来**（test basis/AC-ID/覆盖度量口径）归生成侧治理技能（coverage-metrics.md 唯一权威）；**产物长什么样**（报告三态/产物树/证据命名）归执行侧技能（artifact-conventions.md 唯一权威）；执行期只读本任务书内嵌冻结快照，不追随外部技能最新版本；宿主更严安全红线始终从严；**生成单≠执行单**——只生成不执行、或不经评审直接执行，都会把未过闸的深度固化进执行。
 
 典型流程：你说一句意图（「重点测 XX 模块」/「全项目深度测一遍」）→ 治理技能产出自包含任务书（四活源素材+场景+AC-ID 验收点+门槛标注）→ 任意具备任务注入能力的执行体**拿着任务书**按执行侧纪律跑验收（persona 真实入口/UI 主证/受阻归因/三态报告）→ 报告落产物树 → 经验回灌项目侧知识库、新验收点递单回流生成侧。两侧各一句话即可触发，其余一切信息都在任务书内自包含。
 

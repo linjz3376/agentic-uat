@@ -6,6 +6,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 3.6.0 自主执行控制面重构批
+
+将执行控制统一为 PREFLIGHT/RUNNING/WAITING/REPORTING/CLOSED 与 GLOBAL_NO_GO/BUDGET_EXHAUSTED 支路：CLOSED 只代表报告已签发，不再绑定全 PASS、缺陷修复或风险签署。新增五级阻塞、READY/WAITING/BLOCKED/DONE 调度、六类 BLOCKED 归因、有限 UNREACHABLE 证明、写者租约/fencing token、副作用断点、四件套和保底报告；WAITING 未收判不得 CLOSED。授权改为显式清单，禁止命令即签/沉默授权/默认重启，secrets 仅受控注入。入口主证分 UI/MACHINE/DOC；覆盖按关键/标准/探索风险档，控件以稳定 control_id 和 I/P/O/S 对账。同步正文及 artifact/method/boundary/tool/runbook/gui/defect references；替代旧全绿停止、无限穷尽、格式阻报和签署才收口口径。frontmatter description 改为不枚举归因的通用表述，routing examples/cues 对齐 Git 基线；路由回归 train 36/36、held-out 16/16。失效条件=载体原生提供同等可验证的状态机、授权、调度和恢复能力时进退役评审。
+
 ## 3.5.15 工具名示例入判据层批
 
 owner 2026-11-24 问「是否需要摘要本机 playbooks 重要工具名称作为示例便于 agent 快速查找可用插件」——采纳为 runbook 契约案的补齐环：实例仍不入技能，工具名属生态公共知识可作检索锚点。tool-selection.md 新增 §4.5「工具名示例（生态检索锚点，非限定清单）」：按入口类型列名——浏览器（Playwright MCP/browser-use/内置 browser 工具组）、Windows 辅助树（Windows-MCP/FlaUI-MCP/desk-mcp，computer use 仅视觉兜底）、跨机（QuickDesk 三件套）、Windows 远程（WinRM+计划任务链）、macOS（AX/AppleScript/axterminator）、Linux（AT-SPI/xdotool/ydotool/import/grim/computer-use-linux）。附三条使用纪律：按类检索官方仓库→最小探针→未实弹类别（macOS/Linux）标「桌面调研级」，名字不构成合格证据、仍须过 §1 能力清单与 §2 选型三问；时效声明=2026-11 检索时点快照。

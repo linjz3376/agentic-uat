@@ -1,0 +1,7 @@
+# 报告共同前置负样例（虚构）
+
+- 报告状态：FINAL-WITH-GAPS
+- READY=0；WAITING=1；DONE=1；BLOCKED=1；AC 总数=3
+- BLOCKED 归因：UNREACHABLE
+
+判定：共同前置失败，WAITING 未清空，不得接受 FINAL-WITH-GAPS；返回收判/调度，不得 CLOSED。

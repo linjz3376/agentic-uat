@@ -12,6 +12,18 @@
 | 终点 | `^## (3\.5|4)([. ]|$)`（二级标题：`## 3.5 深度维度覆盖表` / `## 4. 判据表`） | 区间止于该标题行**之前**。**禁止用 `^#+ *(3\.5|4\.)` 类宽匹配**——域子节标题 `### 3.5 …` 会误触发提前截断（实证：某书 191 点被截成 56，恰为 .5 子节之前的域合计） |
 | 行形态 | 主表行有**两种**：`| AC-… |` 与 `| ⛔ AC-… / ⏸️ / ⏭️ |`（门槛前缀在 ID 前） | **裸 `^| AC-` 会把前缀行整批漏计**（实证：某书主表 136 被误数成 119，差额 17 恰为带 ⛔/⏸️/⏭️ 前缀的挂链行）；口径必须按字段归一化取 ID，而非只认行首形态 |
 
+**全文档 ID 边界前置（所有计数/悬空/入口/场景闸共用）**：先运行以下函数，任何 `INVALID_ID` 都使后续扫描结果作废；PowerShell 使用 §13 同一可选子字母+负向边界模式。
+
+```bash
+check_id_boundaries() {
+  awk '{ rest=$0; while (match(rest, /AC-[A-Z0-9]+-[0-9]{3}[A-Z]?/)) {
+    token=substr(rest,RSTART,RLENGTH); tail=substr(rest,RSTART+RLENGTH,1)
+    if (tail ~ /[A-Z0-9]/) print "INVALID_ID " token > "/dev/stderr"
+    rest=substr(rest,RSTART+RLENGTH)
+  } }' "$DOC"
+}
+```
+
 **精确口径的由来（禁止回退裸 grep）**：裸 `grep '^| AC-' $DOC` 会把 ① 各 §3.x 子表头行（`| AC-ID | …`）与 ② §4/判据表等区域的 AC 引用行一并计入——实证：某书主表 191 因 5 行判据表引用行混入被误数成 195，反向曾把自家零重号书写成重号书。凡计数相关闸一律走区间管道。
 
 ## 1. 主表行数 / 唯一数 / 重号（一次出全）
@@ -21,17 +33,17 @@
 ```bash
 scan() {
   awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$1" \
-  | awk -F'|' '{ id=$2; if (match(id, /AC-[A-Z0-9]+-[0-9]{3}/)) print substr(id, RSTART, RLENGTH) }'
+  | awk -F'|' '{ id=$2; if (match(id, /AC-[A-Z0-9]+-[0-9]{3}[A-Z]?/)) { token=substr(id,RSTART,RLENGTH); tail=substr(id,RSTART+RLENGTH,1); if (tail ~ /[A-Z0-9]/) print "INVALID_ID " token > "/dev/stderr"; else print token } }'
 }
 ```
 
-（对 `$2` 字段取首个 `AC-域名-###` 记号——trim/emoji 变体差异一概免疫，表头行 `AC-ID` 与非 ID 单元格自动落榜，门槛前缀行不丢。）
+（对 `$2` 字段取首个 `AC-域名-###` +可选子字母记号；表头和非 ID 单元格落榜，门槛前缀行不丢，后随额外字母/数字即 INVALID_ID。）
 
 ```bash
 scan "$DOC" | sort | uniq -c | sort -k1,1 -k2,2
 ```
 
-判据：① 输出行数 = 唯一 AC 数 = 文档内所有口径数字（头部/范围段/§3 各标题/覆盖表分母/完成准则/汇报模板/产物树）② `uniq -c` 首列全为 `1` = 零重号；出现 `2`+ 的 ID 即重号清单。
+判据：① 输出行数=唯一 AC 数=文档所有口径数字 ② `uniq -c` 首列全为 1 ③ stderr 无 `INVALID_ID`。`AC-02-002`、`AC-02-002A`、`AC-02-002B` 是三个不同合法 ID；后随字母/数字的截断匹配必须报错，不得静默收集。
 Windows PowerShell 等价（口径不变）：见 §13 可复制命令集（区间锁=标题行号，ID 归一=第 2 字段 `-cmatch` 收集，同样覆盖门槛前缀行，勿写死行首形态）。
 **双重反例实证（都曾被真书触发，勿回退）**：不剔表头=计数偏大（判据表引用行混入曾把 191 声明数成 195）；只认行首 `^| AC-`=计数偏小（门槛前缀行漏计曾把 136 数成 119）——片面的行首口径**两个方向都能错**。
 
@@ -39,7 +51,7 @@ Windows PowerShell 等价（口径不变）：见 §13 可复制命令集（区�
 
 ```bash
 comm -23 \
- <(grep -oE 'AC-[A-Z0-9]+-[0-9]{3}' "$DOC" | sort -u) \
+ <(grep -oE 'AC-[A-Z0-9]+-[0-9]{3}[A-Z]?' "$DOC" | sort -u) \
  <(scan "$DOC" | sort -u)
 ```
 
@@ -50,29 +62,29 @@ comm -23 \
 
 ```bash
 awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$DOC" \
- | awk -F'|' '{ id=$2; if (match(id, /AC-[A-Z0-9]+-[0-9]{3}/)) print NF-1 }' | sort | uniq -c
+ | awk -F'|' '{ id=$2; if (match(id, /AC-[A-Z0-9]+-[0-9]{3}[A-Z]?/)) print NF-1 }' | sort | uniq -c
 ```
 
 判据：单一值 = 表头列数+1（全域轮七列含「向」→ 输出 `8`；六列窄域 → 输出 `7`）。出现第二分布=某行断列。
 
-## 4. 版本指针清零（自包含铁律）
+## 4. 运行时外部规范指针清零（冻结自包含）
 
 ```bash
-grep -nE '见契约|以.*V2\.[0-9]|主契约|契约 §|以契约为准|全表见' "$DOC"
+grep -nE '见契约|以.*V[0-9]+\.[0-9]+|主契约|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准' "$DOC"
 ```
 
-判据：零命中（缺陷台账与环境密钥源豁免）。
+判据：零命中（静态出处、密钥提供方、缺陷台账和项目更严安全红线豁免）。另核任务书头部有静态出处与快照哈希，且状态机/授权/报告/产物/契约规范已内联；仅写指针不算内联。
 
 ## 5. 派生依赖清零
 
 ```bash
-grep -nE 'tests/plans/.*uat|docs/reviews/UAT|执行单元|历史任务书|旧版任务书|以.{0,24}块书|块书.{0,24}(为基|为准|承接|沿用|基底)|承接.{0,24}块书|沿用.{0,24}块书' "$DOC"
+grep -nE 'tests/plans/.*uat|docs/reviews/UAT|执行单元|以.{0,24}(历史任务书|旧版任务书|块书).{0,24}(为基|为准|基底|承接|沿用)|(历史任务书|旧版任务书|块书).{0,24}(作为基底|为基底|承接|沿用)' "$DOC"
 ```
 
-判据：除头部 supersede/留痕声明行外零命中。
+判据：输出是**候选**，不是机械零命中；命中后判语境。「禁止/不得/禁读/不作基底」与头部 supersede 留痕为安全否定/溯源；真实「作为基底/承接/沿用」才违规。与 §23 共用同一语境判定。
 **口径边界（活体测必须覆盖三个面）**：
 - 正样例（应命中）：「以块书为基继续生成」「承接块书 AC 区间沿用」「把两份块书列为执行单元」——依赖语境。
-- 负样例（不应命中）：「另派块级深化任务书做增量深化」「全域书不替块书做深度」——前瞻调度，无依赖语义。
+- 非违规样例（可不命中；若候选命中须判安全）：「另派块级深化任务书做增量深化」「历史任务书/契约不作基底」「旧版任务书禁读」「禁止以历史任务书为基底」「不得将历史任务书作为基底」——前瞻、禁止或溯源语境。
 - 裸「块书」词族**已从模式移除**：曾误伤前瞻调度声明；但引用现存文件路径（`tests/plans/…-uat-…` 模式）仍被第一个子模式拦住。
 - **窗口宽度用 `{0,24}` 而非 `{0,6}`**：grep 在非 UTF-8 locale 下 `.` 与量词按**字节**计数——East-CJK 词 3 字节/字，6 字符窗口会漏拦（实证：「承接块书 AC 区间沿用」零命中）；24 字节同时兼容两种 locale，轻微放宽的误拦由口径边界人工裁决兜底。
 - **台账条目计数用 `grep -w`**：`grep -c 'RUN-X-1'` 会把 `RUN-X-10/1x` 一并计入——`grep -cw 'RUN-X-1'` 才是精确挂链数。
@@ -93,7 +105,7 @@ grep -rnE '<已知项目名>|<已知主机或IP>|<已知账号默认口令>|ou_[
 grep -nP '\x{FFFD}' "$DOC"; file "$DOC"
 ```
 
-判据：零命中且编码为 UTF-8。注意：**渲染层显示「乱码感」≠ 文件乱码**——先按 §1~§3 结构复核，可疑段 `od -c` 字节级复核后再定论。
+判据：零命中且编码为 UTF-8。注意：**渲染层显示「乱码感」≠ 文件乱码**——先按 §1 至 §3 结构复核，可疑段 `od -c` 字节级复核后再定论。
 
 `-P` 兜底注：PCRE 支持不是所有 grep 构建都有（macOS BSD grep、部分 BusyBox 报 `grep: -P unsupported`）——改用字节级固定串匹配：`grep -nF "$(printf '\xef\xbf\xbd')" "$DOC"`（U+FFFD 的 UTF-8 字节，任何 grep 构建可用；PS 版见 §13，天然支持 `\uFFFD`）。
 
@@ -108,7 +120,8 @@ git cat-file -e <短号> && echo ANCHOR_OK        # 或 git rev-parse --verify <
 ## 9. 密度机跑（采用「向」列时）
 
 ```bash
-awk -F'|' '($2 ~ /AC-/) && ($3 ~ /^[[:space:]]*(正|负)/){v=$3; gsub(/ /,"",v); print v}' "$DOC" | sort | uniq -c
+awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$DOC" \
+ | awk -F'|' '($2 ~ /AC-/) && ($3 ~ /^[[:space:]]*(正|负)/){v=$3; gsub(/ /,"",v); print v}' | sort | uniq -c
 ```
 
 判据：负/(正+负) ≥ 30%。（与计数闸同款按 ID 字段收集——`^\| AC-` 行首形态会把 `| ⛔ AC-…` 前缀行漏计，负例密度被**低估**。）
@@ -159,8 +172,16 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
   if ($null -ne $start -and $lines[$i] -match '^## (3\.5|4)([. ]|$)') { $endIdx = $i; break }
 }
 $seg = @(); if ($null -ne $start -and $start -lt $endIdx) { $seg = $lines[$start..($endIdx - 1)] }
+# 全文档先枚举宽候选并验证完整 token；非法引用必须报错，不得以不匹配代替。
+$invalidIds = @()
+foreach ($l in $lines) {
+  [regex]::Matches($l, 'AC-[A-Z0-9]+-\d{3}[A-Z0-9]*') | ForEach-Object {
+    if ($_.Value -cnotmatch '^AC-[A-Z0-9]+-\d{3}[A-Z]?$') { $script:invalidIds += $_.Value }
+  }
+}
+if ($invalidIds.Count) { throw "INVALID_ID: $($invalidIds -join ', ')" }
 $ids = @(); foreach ($l in $seg) { $f2 = ($l -split '\|')[1]
-  if ($f2 -and ($f2 -cmatch 'AC-[A-Z0-9]+-\d{3}')) { $ids += $Matches[0] } }
+  if ($f2 -and ($f2 -cmatch 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])')) { $ids += $Matches[0] } }
 ```
 
 **§1 计数/重号等价**（判据同 §1：组数=唯一数=文档内所有口径数字；Count 列全 1=零重号）：
@@ -173,7 +194,7 @@ $ids | Group-Object | Sort-Object Name | Format-Table Count, Name -AutoSize
 
 ```powershell
 $known = $ids | Sort-Object -Unique
-$refs = $lines | ForEach-Object { [regex]::Matches($_, 'AC-[A-Z0-9]+-\d{3}') } |
+$refs = $lines | ForEach-Object { [regex]::Matches($_, 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])') } |
   ForEach-Object { $_.Value } | Sort-Object -Unique
 $refs | Where-Object { $_ -notin $known }
 ```
@@ -182,19 +203,19 @@ $refs | Where-Object { $_ -notin $known }
 
 ```powershell
 $seg | ForEach-Object { $f2 = ($_ -split '\|')[1]
-  if ($f2 -and ($f2 -cmatch 'AC-[A-Z0-9]+-\d{3}')) { ($_ -split '\|').Count - 1 } } | Group-Object
+  if ($f2 -and ($f2 -cmatch 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])')) { ($_ -split '\|').Count - 1 } } | Group-Object
 ```
 
 **§4 指针清零等价**（判据：零命中，豁免同 §4）：
 
 ```powershell
-$lines | Select-String -Pattern '见契约|以.*V2\.[0-9]|主契约|契约 §|以契约为准|全表见'
+$lines | Select-String -Pattern '见契约|以.*V[0-9]+\.[0-9]+|主契约|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准'
 ```
 
-**§5 派生依赖等价**（判据同 §5：除头部 supersede/留痕行外零命中；.NET 正则窗口按字符计数，无需字节放宽）：
+**§5 派生依赖等价**（判据同 §5：输出为候选，按禁止/溯源/真实依赖语境判定，不再机械零命中；.NET 正则窗口按字符计数，无需字节放宽）：
 
 ```powershell
-$lines | Select-String -Pattern 'tests/plans/.*uat|docs/reviews/UAT|执行单元|历史任务书|旧版任务书|以.{0,24}块书|块书.{0,24}(为基|为准|承接|沿用|基底)|承接.{0,24}块书|沿用.{0,24}块书'
+$lines | Select-String -Pattern 'tests/plans/.*uat|docs/reviews/UAT|执行单元|以.{0,24}(历史任务书|旧版任务书|块书).{0,24}(为基|为准|基底|承接|沿用)|(历史任务书|旧版任务书|块书).{0,24}(作为基底|为基底|承接|沿用)'
 ```
 
 **§6 零实例等价**（先用本机上下文替换占位符再执行，判据零命中，豁免同 §6）：
@@ -213,7 +234,7 @@ $lines | Select-String -Pattern '\uFFFD'
 
 ```powershell
 $seg | ForEach-Object { $c = $_ -split '\|'
-  if ($c[1] -cmatch 'AC-[A-Z0-9]+-\d{3}' -and $c[2] -match '^\s*(正|负)') { $c[2].Trim() } } | Group-Object
+  if ($c[1] -cmatch 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])' -and $c[2] -match '^\s*(正|负)') { $c[2].Trim() } } | Group-Object
 ```
 
 **§10 台账映射等价**（判据同 §10：逐条 ≥1 或显式 N/A+理由；PS 无 `-w` 旗标，用边界环视等价词边界——`RUN-X-1` 不会误吞 `RUN-X-10`）：
@@ -244,7 +265,7 @@ Get-Content routes.txt -Encoding UTF8 | ForEach-Object {
 
 ```bash
 awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$DOC" \
-| awk -F'|' '{ id=$2; if (match(id,/AC-[A-Z0-9]+-[0-9]{3}/)) {
+| awk -F'|' '{ id=$2; if (match(id,/AC-[A-Z0-9]+-[0-9]{3}[A-Z]?/)) {
     op=$4; if ($3 !~ /^ *(正|负) *$/) op=$3; s=op; gsub(/^ +| +$/,"",s);
     n=gsub(/\[UI\]/,"&",s)+gsub(/\[MACHINE\]/,"&",s)+gsub(/\[DOC\]/,"&",s);
     if (n!=1 || s !~ /^\[(UI|MACHINE|DOC)\]/) printf "TAG? %s (tags=%d)\n", substr(id,RSTART,RLENGTH), n } }'
@@ -258,7 +279,7 @@ PowerShell 等价：
 ```powershell
 $seg | ForEach-Object {
   $c = $_ -split '\|'; $id = $c[1]
-  if ($id -cmatch 'AC-[A-Z0-9]+-\d{3}') {
+  if ($id -cmatch 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])') {
     $ac = $Matches[0]
     $op = if ($c[2] -match '^\s*(正|负)\s*$') { $c[3] } else { $c[2] }
     $n = ([regex]::Matches($op, '\[UI\]')).Count + ([regex]::Matches($op, '\[MACHINE\]')).Count + ([regex]::Matches($op, '\[DOC\]')).Count
@@ -267,28 +288,20 @@ $seg | ForEach-Object {
 }
 ```
 
-## 15. BLOCKED/⏭️ 通道结论
+## 15. BLOCKED 六类归因与 ⏭️ 通道结论
 
-每条 `BLOCKED` 或 `⏭️` 的证据栏必须含三选一结论：`不存在` / `不可用`（附原因）/ `未授权`。
+1. 每条 BLOCKED 必须且仅有一个主归因：UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED，并有对应证明。
+2. UNREACHABLE 核有限努力证明，不要求换人/换时间；OBSERVABILITY_BLOCKED 核原始错误或结构化尝试记录；BUDGET_EXHAUSTED 核预算快照；DEFERRED 核接受人。
+3. 涉及入口存在性/可达性的 ⏭️，以及涉及入口的 UNREACHABLE/UNAUTHORIZED，必须含「不存在/不可用+原因/未授权」结论；纯 DOC 不适用项只核存在性证据，预算/观测/其他归因不得伪造通道结论。
+4. 造数返回码不得作产品判定依据。
 
-```bash
-grep -nE '\|[[:space:]]*(BLOCKED|⏭️)' "$REPORT" | grep -vE '不存在|不可用|未授权'
-```
-
-判据：输出为空（无「没找到」「未覆盖」式结论）。
-补充：造数动作的返回码不得出现在判定依据里——用 API 造完数据后，判定仍须回到该点的入口侧观察。
-
-PowerShell 等价：
-
-```powershell
-$lines | Where-Object { $_ -match '\|\s*(BLOCKED|⏭️)' -and $_ -notmatch '不存在|不可用|未授权' }
-```
+可选辅助：先收集 BLOCKED 行，再逐行核六类归因及证明；不能只靠关键词数量判合格。正反样例见 §20 与 §23。
 
 ## 16. 场景-AC 双向闭合
 
 **模型自检提示（不依赖脚本）：**
 
-1. 读 §0 场景表：每个 S-ID（S0/G0 除外）是否有 `persona / 动机 / 业务目标 / 入口 / 基本流 / 备选流≥2 / 异常流≥2 / 交接`？流可 N/A+理由（占位凑数=不合格）；缺项逐条列出。
+1. 读 §0 场景表：每个 S-ID（S0/G0 除外）是否有八要素？基本流必有；备选/异常按风险档有设计目标，无意义分支 N/A+可核理由，关键档强制异常不得缺，重复凑数同样不合格。
 2. 读 §0.1 场景-AC 矩阵：每个 AC 是否至少挂 1 个 S-ID？每个 S-ID（S0/G0 除外）是否至少挂 1 个 AC？矩阵并集是否等于 §3 主表全集？差集逐条列出。
 3. 读 §0.2 handoff 矩阵：跨角色/跨块场景是否有交接记录；单角色单块是否有 N/A+理由。
 4. 读 §6 执行顺序：是否写“按 S1→Sn 场景执行，场景内基本流→备选流→异常流；域顺序只做 AC 回归”？写“按域顺序执行”=场景降级，返工。
@@ -299,7 +312,7 @@ $lines | Where-Object { $_ -match '\|\s*(BLOCKED|⏭️)' -and $_ -notmatch '不
 # 场景表 S-ID（示例：S1/G1/G-DOM-APV）；先截 §0 区间，避免匹配正文其他表
 awk '/^## 0\./{f=1} /^## 1\./{f=0} f' "$DOC" | grep -nE '^\|[[:space:]]*(S|G)[0-9A-Z-]+[[:space:]]*\|'
 # 场景-AC 矩阵内出现的 AC（只截 §0，避免正文其他表误命中）
-awk '/^## 0\./{f=1} /^## 1\./{f=0} f' "$DOC" | grep -nE '^\|[[:space:]]*(S|G)[0-9A-Z-]+[[:space:]]*\|.*AC-[A-Z0-9]+-[0-9]{3}'
+awk '/^## 0\./{f=1} /^## 1\./{f=0} f' "$DOC" | grep -nE '^\|[[:space:]]*(S|G)[0-9A-Z-]+[[:space:]]*\|.*AC-[A-Z0-9]+-[0-9]{3}[A-Z]?'
 ```
 
 > 注意：不要对全文裸 grep S/G 行——正文其他表也可能出现 `G1`/`S1` 字样，会误判。先截 §0 区间再匹配。
@@ -310,19 +323,21 @@ PowerShell 等价（先截 §0 区间）：
 $i0 = ($lines | Select-String -Pattern '^## 0\.' | Select-Object -First 1).LineNumber
 $i1 = ($lines | Select-String -Pattern '^## 1\.' | Select-Object -First 1).LineNumber
 $sec0 = $lines[($i0-1)..($i1-2)]
-$sec0 | Select-String -Pattern '^\|\s*(S|G)[0-9A-Z-]+\s*\|.*AC-[A-Z0-9]+-\d{3}'
+$sec0 | Select-String -Pattern '^\|\s*(S|G)[0-9A-Z-]+\s*\|.*AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])'
 ```
 
 判据：模型逐条回答“有/无+证据”；任一缺项=场景模型不合格，报告只能 INTERIM。
 
-## 17. UI 主证与 UI 写点
+## 17. UI/MACHINE/DOC 入口主证
 
 **模型自检提示：**
 
-1. 从 §3 取出全部 `[UI]` 行；对每个判 PASS 的点，检查证据是否含判定时截图或 `[DOM]` 文本/选择器。只有 API 响应/DB/日志的，最高 PARTIAL。
-2. 对每个 `[UI]` 写点，检查操作列是否写实际控件标签、confirm/alert/prompt 文案、保存后回显；只写“填表保存”=不可执行。
-3. 报告是否有 `UI 证据覆盖表`：UI AC 总数 / PASS 数 / 有判定时截图或 DOM 的 PASS 数 / 覆盖率；覆盖率<100% 必须写“UI PASS 证据覆盖 N/M”并判 INTERIM。
-4. 是否有“事后补证”标注；事后截图不得升级原判定。
+1. UI PASS 必须有判定时截图或 `[DOM]`；已见结果但缺主证最高 PARTIAL，完全无法观察则 OBSERVABILITY_BLOCKED。
+2. 每个 UI 写点有实际控件标签、适用对话框和保存后回显；只写“填表保存”=不可执行。
+3. MACHINE PASS 必须有符合契约的响应与内容断言；有状态变更语义时另核幂等和预期可观察副作用，纯只读不得为取证造副作用。无 UI 不是失败理由，HTTP 200 不单独构成通过。
+4. DOC PASS 必须有本轮对账表，不得冒充产品功能验证。
+5. 报告入口证据表分别列 UI 主证、MACHINE 契约和 DOC 对账；UI PASS 主证覆盖不足 100% 判 INTERIM。
+6. 事后补证不得升级原判定。
 
 **可选 grep 辅助：**
 
@@ -340,7 +355,7 @@ $seg | Select-String -Pattern '\[UI\]'
 Select-String -Path $REPORT -Pattern 'UI.*证据.*覆盖|判定时截图|事后补证'
 ```
 
-判据：UI PASS 无 UI 证据=报告不合规；不得用“有响应原文”替代。
+判据：✅ 必须满足对应入口主证；UI PASS 无 UI 证据不得通过，MACHINE 无 UI 不扣分，DOC 不替代产品验证。主证缺口影响报告状态，但不得阻止保底 INTERIM。
 
 ## 18. G0/SBTM 记录
 
@@ -359,10 +374,10 @@ grep -nE '\bG0\b|\bS0\b|自由探索|皱眉时刻|观察.*疑问.*缺陷.*覆盖
 > PowerShell 等价必须加 `-CaseSensitive`，并用 `\bG0\b|\bS0\b` 词边界——默认不区分大小写时 `S0` 会误命中 ID/哈希子串（实证：`1PUKz...` 类 ID 被误判）。
 
 ```powershell
-Select-String -Path $REPORT -CaseSensitive -Pattern 'G0|S0|自由探索|皱眉时刻|观察.*疑问.*缺陷.*覆盖'
+Select-String -Path $REPORT -CaseSensitive -Pattern '\bG0\b|\bS0\b|自由探索|皱眉时刻|观察.*疑问.*缺陷.*覆盖'
 ```
 
-判据：有记录且可复核；只有“已执行”一句话=不合格。
+判据：有实际章节/表格记录且可复核；只有“已执行”或注释提名词语不合格。活体测：真实 `## G0/SBTM 记录` 应命中，哈希子串 `1PUKzS0abc` 不得命中；模式中只允许字面 `\b`，禁止 U+0008 控制符。
 
 ## 19. 执行顺序与场景日志
 
@@ -394,27 +409,47 @@ Select-String -Path $DOC,$REPORT -Pattern '场景完成|场景级结论|按.*场
 |---|---|
 | `positive-book.md` + `positive-report.md` | §16–§19 全部 PASS（不误伤） |
 | `negative-book.md` + `negative-report.md` | §16–§19 命中缺口（仍能拦截） |
+| `positive-id-subletters.md` | §1–§3 收集 002/002A/002B 三个唯一 ID，无重号/悬空 |
+| `negative-id-reference.md` | 合法主表 002A+非法引用 002AB 必须输出 INVALID_ID |
+| `positive-coverage-ledger.md` | 按表头读设计期第 4 列，尾格不误当桶位 |
+| `positive-execution-book.md` + `positive-report-with-gaps.md` | §21–§23 通过；合法 FINAL-WITH-GAPS 不被误杀 |
+| `negative-report-waiting.md` | 共同前置 WAITING=1，必须拒绝报告状态和 CLOSED |
+| `negative-execution-book.md` | §21–§23 命中动态指针、沉默授权、全绿停止、全局化局部故障和无保底报告 |
 
-改任何闸后：先跑正样例验证不误伤，再跑负样例验证仍拦截——两个结果都符合预期，闸才可发布。样例为通用虚构内容（财务归档员/审计员），零实例残留；项目使用时可用本项目任务书替换负样例。
+改任何闸后先跑正样例再跑负样例，并实际执行 §23 全部桌面推演。样例为通用虚构内容，零实例残留；校验器先证明负例会被拦截，再采信正例输出。
 
-## 21. 报告称谓闸（G5 收官闸的产物侧机验，唯一命令载体）
+## 21. 报告三态与保底闸（G5）
+
+先核共同前置硬闸：READY=0、WAITING=0、DONE+BLOCKED=AC 总数；不满足则不得进入任何三态，返回调度或按全局支路先转 BLOCKED。随后读报告头 `报告状态` 按分支校验，禁止只看文件名或统一要求未触=0：
+
+| 状态 | 必须满足 |
+|---|---|
+| FINAL | BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0；UI PASS=0 时 N/A 或主证 100%；计划产物完整；S+G=0 且 O=P |
+| FINAL-WITH-GAPS | 不满足 INTERIM且存在 BLOCKED/未裁定 ⏸️/S/G；BLOCKED 有合法外部归因或 DEFERRED 接受记录；⏸️ 要件齐；S/G 有稳定 ID+证据+合法映射；无缺口不得本态 |
+| INTERIM | 任一入口 PARTIAL，或 OMITTED/BUDGET_EXHAUSTED，或主证/计划产物缺口，或 ⏸️ 要件缺失，或 P=O+S+G 不成立，或 S/G 缺稳定 ID/证据/合法映射；允许 CLOSED |
 
 ```bash
-grep -nE 'Final-Report-Gate' <任务书>                        # ≥1 命中——完成准则含「未触=0 方可出 final 报告」前置与 interim 出口条款
-grep -nE '^#{1,6} .*(终期|收官)|收官 GO' interim-report-*.md   # 零命中——称谓类措辞载体=标题/章节名与判定措辞；降级记/闸注记等治理留痕文本豁免
-grep -nE '带伤 GO' interim-report-*.md                       # 每行同行含「窗口」标注
-grep -nE '未触=0' final-report.md                            # 头部核验行 ≥1 命中
+grep -nE 'Final-Report-Gate' "$DOC"
+grep -nE '报告状态|BLOCKED|OMITTED|BUDGET_EXHAUSTED|保底报告|CLOSED' "$REPORT"
 ```
 
-判据：interim-report 禁「终期/收官/final」称谓、第七段标注「窗口口径/阶段判定」、第④段明示未触 N 点；「收官 GO/带伤 GO」字样仅在未触=0 的报告内合法。
+判据：状态与条件一致；FINAL-WITH-GAPS 不得被「未触=0」误杀；INTERIM 不需伪装终期。模拟产物命名/断链失败时仍必须能签最小报告；「未过不得出报告」为负例。
 
-## 22. 执行契约锚（G2「执行契约骨架入书」的产物侧机验）
+## 22. 执行契约冻结快照（G2）
 
 ```bash
-grep -nE 'Execution-Contract' <任务书>                                  # ≥1 命中——头部含执行契约节
-grep -cE '登记写者|状态唯一事实源|未登记判定清单' <任务书>               # ≥3——五字段中三核心字段占位在列
-grep -nE '登记铁律.*(3\.3\.[0-9]+|v[0-9])' <任务书>                     # 零命中——出处指针不标版本号（快照纪律）
+grep -nE 'Execution-Contract|writerId|leaseEpoch|leaseExpiresAt|READY|WAITING|BLOCKED|DONE|预算|新鲜观察|收判|报告' "$DOC"
+grep -nE '执行期以.*当前版本|当前版本为准|五字段骨架|三件套' "$DOC"
 ```
 
-判据：契约节为**骨架**——登记写者/未登记判定清单等运行时字段一律占位符，禁填定值（由执行侧首个载体开工时填写、随登记划除）；契约文件路径按报告树 obs/ 推导，不写绝对实例路径；格式定义一律指针到执行侧登记铁律，冲突记偏差提交裁定，不静默沿用。
+判据：契约含 SUA schema 的完整内联骨架，运行时值留占位；写者租约、四队列、预算、恢复和报告字段缺一不可。第二命令零命中；静态出处可保留但不构成运行依赖。
+
+## 23. 自主续跑、授权与局部阻塞
+
+```bash
+grep -nE '命令即签|沉默=GO|沉默即 GO|默认授予全集|默认等空闲重启|等空闲重启.*默认|全绿或 NO-GO|全绿.*前不得停|缺陷全部修复才可出报告|穷尽合法手段|换人/换时间|运行中禁止新增人机请求|打回生成侧重做|未过不得出报告' "$DOC"
+grep -nE 'ACTION|AC|SCENARIO|DOMAIN|GLOBAL|READY|WAITING|BUDGET_EXHAUSTED|OBSERVABILITY_BLOCKED|迟发依赖|保底报告' "$DOC"
+```
+
+判据：第一组是**审查候选，不是机械零命中**；命中若处于「禁止/不得/负例」等否定语境则安全，肯定授权/停止语境才违规。第二组语义逐项存在且形成闭环。桌面推演：①单角色凭据失效后独立 DOC 继续 ②无法截图时 READY 继续 ③预算耗尽先把 READY/WAITING 逐项转 BUDGET_EXHAUSTED，双空后 INTERIM+CLOSED ④写者失联接管含 trigger 迁移或保底 ⑤风险未签署不撤销报告 ⑥自主全 ✅ 无缺口可 FINAL ⑦任一 MACHINE PARTIAL 必 INTERIM ⑧控件 S/G>0 不得 FINAL且必须列稳定 ID ⑨外部不可达 UI 的计划控件进 G 且可 WITH-GAPS，不因 O<P-S 自动 INTERIM ⑩完全无缺口不得 WITH-GAPS。任一出现无状态/无出口等待=闸失败。
 
