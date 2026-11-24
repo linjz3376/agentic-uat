@@ -1,6 +1,6 @@
 # FINAL 但用户失败的正样例（虚构）
 
-报告头：任务=FAIL-DEMO；环境=UAT；执行模式=SINGLE_SESSION；无偏离。
+报告头：任务=FAIL-DEMO；环境=UAT；执行模式=SINGLE_WRITER；无偏离。
 
 ## 第一节：关键旅程结论
 

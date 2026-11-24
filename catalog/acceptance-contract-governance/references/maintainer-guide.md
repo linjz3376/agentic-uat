@@ -9,7 +9,8 @@
 | 缺口类型 | 去向 |
 |---|---|
 | persona、真实入口、用户判据、用户语言缺陷、安全红线 | SUA/ACG 核心 |
-| 长任务调度、租约、收判、接管 | EXTENDED_UNATTENDED 规范 |
+| 长任务调度、WAITING、收判、超时、最小断点 | 所有模式共享的 SINGLE_WRITER 基础内核 |
+| 并行写者租约、CAS、fencing、分片归并、接管 | 仅 PARALLEL_UNATTENDED 扩展规范 |
 | 驱动器、主机、端点、项目环境经验 | 项目 playbook/fixtures |
 | 产物命名、树形、链接、报告格式 | artifact 规范 |
 | 技能路由、发布、版本和修订流程 | 本维护者规程 |

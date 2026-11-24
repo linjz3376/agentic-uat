@@ -16,7 +16,7 @@
 | 维度 | Owner | 协作界面 |
 |---|---|---|
 | 覆盖范围、风险档、判据 | ACG | 产品 AC 仅 UI/MACHINE；DOC 用 AUDIT-ID 独立审计，不进需求验证分子/UAT 三态；历史契约禁作基底 |
-| 拟人旅程、预算、停止与执行模式 | SUA | 所有任务书冻结核心；SINGLE_SESSION 只带最小断点，EXTENDED_UNATTENDED 才内联状态机/四队列/租约/收判/接管 |
+| 拟人旅程、预算、停止与执行模式 | SUA | 所有任务书冻结核心；SINGLE_WRITER 默认含共享状态机/逻辑四态/长窗收判/最小断点，PARALLEL_UNATTENDED 仅实际并行/接管时内联租约/CAS/fencing/分片归并 |
 | 授权矩阵 | SUA + 项目/全局安全红线 | ACG 生成授权清单；操作者显式确认范围，项目更严规则优先 |
 | 场景模型 | ACG | 每关键业务目标有连续基本流/交接/最终结果；禁止域批吞并全部 AC；场景完成与 AC 挂靠分开 |
 | 报告三态、保底报告、产物核心约束、命名 | SUA | ACG 固化快照；任务书仅选合法 profile/扩展 |
@@ -27,7 +27,7 @@
 
 ## 3 静态快照协议
 
-1. 生成时读取 SUA 当前规范，将拟人核心与本轮所选执行模式内联，记录静态出处和哈希；SINGLE_SESSION 不带长任务 schema，EXTENDED_UNATTENDED 才内联完整契约。
+1. 生成时读取 SUA 当前规范，将拟人核心与本轮所选执行模式内联，记录静态出处和哈希；SINGLE_WRITER 必带自主长任务内核，PARALLEL_UNATTENDED 仅实际并行/接管时内联扩展契约。
 2. 运行时只读任务书；不得出现「执行期以当前版本为准」。宿主更严安全红线始终从严，其他外部更新不热切换。
 3. 外部差异只记录；影响判据真值时相关 AC 实测后 ⏸️，其他 READY 项继续，报告按内嵌规则签发。
 4. 产物优先级=SUA 核心约束>任务书合法 profile/扩展>默认布局；任务书不能豁免 UI 主证、安全或报告底线。
@@ -37,7 +37,7 @@
 ```text
 操作者意图与授权范围
   → ACG：源头对账→风险/预算→场景与 AC→内联冻结规范
-  → SUA：按 SINGLE_SESSION/EXTENDED_UNATTENDED 执行真实连续旅程→局部受阻续跑
+  → SUA：按 SINGLE_WRITER/PARALLEL_UNATTENDED 执行真实连续旅程→局部受阻续跑
   → 报告首节给关键旅程定性结论→CLOSED（FINAL / FINAL-WITH-GAPS / INTERIM）
   → 独立后续：缺陷修复、风险接受、经验回灌、下轮生成
 ```

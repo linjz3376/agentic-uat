@@ -7,7 +7,7 @@
 
 ```text
 <report-root>/                        # 默认 tests/reports/<YYYY-MM-DD>-<domain>/
-├─ execution-log.md                   # 必需：环境/预算/最小断点/逐 AC；四队列仅扩展模式
+├─ execution-log.md                   # 必需：环境/预算/最小断点/逐 AC；逻辑四态所有模式；并行契约仅 PARALLEL_UNATTENDED
 ├─ defects.md                         # 必需：已定性+待定性+风险接受+阻塞
 ├─ final-report.md                    # FINAL / FINAL-WITH-GAPS
 ├─ interim-report-<YYYY-MM-DD>.md     # INTERIM，与 final 二选一
@@ -17,7 +17,7 @@
 ├─ imports/                           # 有上传动作时必需
 ├─ exports/                           # 有下载动作时必需
 ├─ obs/
-│  ├─ contract.md                     # 多回合、长窗或无人值守时必需
+│  ├─ contract.md                     # 仅 PARALLEL_UNATTENDED 时必需
 │  ├─ control-matrix.json             # 有 UI 涉验页时必需
 │  └─ results.json                    # 使用机算结果文件时采用；非唯一载体
 ├─ cleanup-list.md                    # 有造数/清场债务时必需
@@ -35,13 +35,13 @@
 
 | 文件 | 必须包含 | 禁止包含 |
 |---|---|---|
-| `execution-log.md` | 环境闸、授权引用、执行模式、预算、最小断点、逐 AC 状态/证据/缺陷、造数与恢复；四队列仅 EXTENDED_UNATTENDED | 大段报告正文；凭据；SINGLE 伪造四队列 |
+| `execution-log.md` | 环境闸、授权引用、执行模式、预算、最小断点、逐 AC 状态/证据/缺陷、造数与恢复；所有模式始终记录逻辑 READY/WAITING/BLOCKED/DONE；物理四队列/租约仅 PARALLEL_UNATTENDED | 大段报告正文；凭据；SINGLE_WRITER 伪造并行租约 |
 | `defects.md` | 已定性表、待定性表、统计、风险接受清单、阻塞项、该轮新增十段式副本 | 无留痕关闭项；凭据 |
 | `final-report.md` | 报告状态、未触核验、总览/域/维度、缺陷、对账、残留、结论 | 与当前 interim 并存 |
 | `interim-report-<date>.md` | 未触/预算/证据缺口、补测任务单、已完成结论、final 暂缓原因 | 冒充产品已验收 |
 | `evidence/` | 判定同时刻截图/DOM/网络/机器响应/对账；失败时原始错误与结构化尝试记录 | 事后补拍冒充；无关个人数据 |
 | `imports/`、`exports/` | 原始文件及五要素清单 | 二次编辑冒充原件 |
-| `obs/contract.md` | 本文 §6.1 至 §6.4 全部字段、写者租约、四队列、断点、收判触发器 | 硬编码密钥；无时间戳快照 |
+| `obs/contract.md` | 仅 PARALLEL_UNATTENDED：本文 §6.1 至 §6.4 的租约、物理队列、接管与收判包；§6.0 共享内核仍写 execution-log | 硬编码密钥；SINGLE_WRITER 创建此文件 |
 
 ## 3 命名细则
 
@@ -93,7 +93,7 @@ interim-report-<YYYY-MM-DD>.md；同日多份追加 -2、-3 并登记
 
 ### 4.3 报告三态（共同前置+顺序判定）
 
-UAT 身份前置=至少一条真实 persona 产品旅程有定性结论，DOC 不参与。所有模式共同前置=每个计划产品 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED。SINGLE_SESSION 另核最小断点无待续动作且无仍可执行独立项，不创建 READY/WAITING/四队列；EXTENDED_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序取首个命中：
+UAT 身份前置=至少一条真实 persona 产品旅程有定性结论，DOC 不参与。所有模式共同前置=每个计划产品 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED。SINGLE_WRITER 另核逻辑四态已落 execution-log、最小断点无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序取首个命中：
 
 | 顺序 | 条件 | 状态 | 文件 |
 |---:|---|---|---|
@@ -168,12 +168,12 @@ BLOCKED → 归因审计
 
 控件统一按稳定 `control_id` 去重，动作行数不等于控件数：`I`=范围内清单控件数，`P`=执行前锁定的计划操作控件数，`O`=P 中完成有效操作的唯一控件数（计划外操作另列），`S`=P 中获接受 DEFERRED 的唯一控件数，`G=P\(O∪S)`=其余计划缺口的唯一控件集合。必须满足 P=O+S+G，O/S/G 互斥。未授权、不可达、观测受限未操作项进 G 并带对应归因，不得挤入 S。清单覆盖率=已落 AC/N/A 的唯一控件数/I；操作率同时展示原始 O/P 与 `O/(P-S)`，分母 0 标 N/A+理由，不得只展示扣除后的 100%。DOM、a11y、视觉按稳定键合并，a11y 只提供差集线索。
 
-## 6 执行契约与收判包 schema（仅 EXTENDED_UNATTENDED）
+## 6 自主长任务内核与并行扩展契约
 
-### 6.0 模式边界与状态机
+### 6.0 模式边界与共享状态机
 
-- SINGLE_SESSION：单会话/单写者/无长窗，只保留场景、AC、当前步骤、下一动作、预算、证据、缺陷和最小断点；不创建 obs/contract，不携带租约/CAS/fencing/四队列。最小停止链=当前动作完成或最小作用域 BLOCKED→继续下一独立项→全部计划产品 AC 为 DONE/BLOCKED 且无待续/可执行独立项→REPORTING→CLOSED。
-- EXTENDED_UNATTENDED：有多回合、长窗、并行写者或无人值守接管时才启用本节完整规范；任务书只冻结实际所选模式。
+- SINGLE_WRITER（默认）：单写者短任务与长任务同权，execution-log 始终含逻辑 READY/WAITING/BLOCKED/DONE、当前步骤、下一动作、解除条件、resumeAfter、一次性收判、超时、预算、副作用和证据；不创建 obs/contract，不携带租约/CAS/fencingToken。长窗在同任务/授权内原地续跑，不另出书、不重复请示。最小停止链=当前动作完成或最小作用域 BLOCKED→继续下一独立项→全部计划产品 AC 为 DONE/BLOCKED 且无待续/可执行独立项→REPORTING→CLOSED。
+- PARALLEL_UNATTENDED：仅实际并行写者或外部接管时启用租约、CAS、fencingToken、分片归并与触发器迁移；长窗本身不是启用理由。任务书只冻结实际所选模式。
 
 ```text
 PREFLIGHT → RUNNING ⇄ WAITING
@@ -188,7 +188,7 @@ WAITING 解除未判→READY，收判完成→DONE，失败/超时→BLOCKED；�
 
 ### 6.1 契约字段
 
-`obs/contract.md` 在长窗、多回合或无人值守时创建，至少包含：
+`obs/contract.md` 仅在 PARALLEL_UNATTENDED（实际并行写者/外部接管）时创建，至少包含：
 
 1. **登记写者与租约**：writerId、leaseEpoch、fencingToken=leaseEpoch、acquiredAt、leaseExpiresAt、heartbeatAt；过户使用原子锁/等效 CAS，所有主状态写入必须校验当前 fencingToken。
 2. **状态唯一事实源**：本报告树状态表路径；并行执行者可写分片日志，只有当前合法写者归并主状态。

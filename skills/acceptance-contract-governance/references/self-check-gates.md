@@ -383,17 +383,17 @@ Select-String -Path $DOC,$REPORT -Pattern '场景完成|场景级结论|按.*场
 | `positive-coverage-ledger.md` | 按表头读设计期第 4 列，尾格不误当桶位 |
 | `positive-execution-book.md` + `positive-report-with-gaps.md` | §21–§23 通过；合法 FINAL-WITH-GAPS 不被误杀 |
 | `negative-report-waiting.md` | 共同前置 WAITING=1，必须拒绝报告状态和 CLOSED |
-| `negative-focus-book.md` | §24 拦截 DOC 冒充 AC、人类 CLI 误 MACHINE、域批吞并、技术信号直判缺陷、单会话长任务 schema |
+| `negative-focus-book.md` | §24 拦截 DOC 冒充 AC、人类 CLI 误 MACHINE、域批吞并、技术信号直判缺陷、SINGLE_WRITER 携带并行接管 schema |
 | `positive-focus-book.md` + `positive-focus-report.md` | 合法人类 CLI/API、真机器只读、独立 AUDIT、连续旅程、TECH-OBS 不误伤 |
 | `positive-report-final-fail.md` | 全项有证据、UI PASS=0、存在 ❌，仍可 FINAL |
-| `negative-extended-missing-field.md` | EXTENDED 仅缺 reconciliationSource 也必须 FAIL |
+| `negative-extended-missing-field.md` | PARALLEL_UNATTENDED 仅缺 reconciliationSource 也必须 FAIL |
 | `negative-execution-book.md` | §21–§23 命中动态指针、沉默授权、全绿停止、全局化局部故障和无保底报告 |
 
 改任何闸后先跑正样例再跑负样例，并实际执行 §23 全部桌面推演。样例为通用虚构内容，零实例残留；校验器先证明负例会被拦截，再采信正例输出。
 
 ## 21. 报告三态与保底闸（G5）
 
-先核 UAT 身份：至少一条真实 persona 产品旅程有定性结论，DOC/AUDIT 不参与。所有模式核每个计划产品 AC 为 DONE/合法 BLOCKED；SINGLE 另核最小断点无待续/独立可执行项且不创建队列，EXTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数；不满足则不得进入任何三态，返回调度或按全局支路先转 BLOCKED。随后读报告头 `报告状态` 按分支校验，禁止只看文件名或统一要求未触=0：
+先核 UAT 身份：至少一条真实 persona 产品旅程有定性结论，DOC/AUDIT 不参与。所有模式核每个计划产品 AC 为 DONE/合法 BLOCKED；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/独立可执行项且不创建并行写者契约，PARALLEL_UNATTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数；不满足则不得进入任何三态，返回调度或按全局支路先转 BLOCKED。随后读报告头 `报告状态` 按分支校验，禁止只看文件名或统一要求未触=0：
 
 | 状态 | 必须满足 |
 |---|---|
@@ -412,11 +412,11 @@ grep -nE '报告状态|BLOCKED|OMITTED|BUDGET_EXHAUSTED|保底报告|CLOSED' "$R
 
 先读任务书头执行模式：
 
-- SINGLE_SESSION：只允许场景/persona/当前 AC/步骤/下一动作/预算/证据/缺陷/最小断点。相关词命中是候选：实际字段赋值、非空 schema、接管步骤或租约配置=FAIL；「禁止/不得/无/不包含」等否定说明安全。不得把禁令本身误判为携带 schema。
-- EXTENDED_UNATTENDED：必须完整内联状态机、四队列、writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、预算、新鲜观察、trigger 迁移、收判包和报告字段。断点逐字段核：AC-ID、queue、scope、currentStep、intent、acceptanceSignal、dependencies、blockCause、releaseCondition、resumeAfter、attemptCount、retryLevel、lastObservation、budgetUsed、sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource、nextAction、evidenceRefs、unregisteredJudgements；缺任一即 FAIL。
+- SINGLE_WRITER：必须含共享状态机、逻辑 READY/WAITING/BLOCKED/DONE、长窗解除条件/resumeAfter/一次性收判/超时、预算、副作用、证据和最小断点；长窗原地续跑，不另出书/重复授权。并行相关词命中是候选：实际字段赋值、非空 schema、接管步骤或租约配置=FAIL；「禁止/不得/无/不包含」等否定说明安全。不得把禁令本身误判为携带 schema。
+- PARALLEL_UNATTENDED：必须完整内联状态机、四队列、writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、预算、新鲜观察、trigger 迁移、收判包和报告字段。断点逐字段核：AC-ID、queue、scope、currentStep、intent、acceptanceSignal、dependencies、blockCause、releaseCondition、resumeAfter、attemptCount、retryLevel、lastObservation、budgetUsed、sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource、nextAction、evidenceRefs、unregisteredJudgements；缺任一即 FAIL。
 
 ```bash
-grep -nE 'SINGLE_SESSION|EXTENDED_UNATTENDED|最小断点|leaseEpoch|fencingToken|triggerId' "$DOC"
+grep -nE 'SINGLE_WRITER|PARALLEL_UNATTENDED|最小断点|leaseEpoch|fencingToken|triggerId' "$DOC"
 grep -nE '执行期以.*当前版本|当前版本为准' "$DOC"
 ```
 
@@ -429,7 +429,7 @@ grep -nE '命令即签|沉默=GO|沉默即 GO|默认授予全集|默认等空闲
 grep -nE 'ACTION|AC|SCENARIO|DOMAIN|GLOBAL|READY|WAITING|BUDGET_EXHAUSTED|OBSERVABILITY_BLOCKED|迟发依赖|保底报告' "$DOC"
 ```
 
-判据：第一组是**审查候选，不是机械零命中**；命中若处于「禁止/不得/负例」等否定语境则安全，肯定授权/停止语境才违规。第二组语义逐项存在且形成闭环。桌面推演：①单角色凭据失效后独立 AUDIT 继续 ②无法截图时下一独立项继续（EXTENDED 为 READY） ③预算耗尽先把 READY/WAITING 逐项转 BUDGET_EXHAUSTED，双空后 INTERIM+CLOSED ④写者失联接管含 trigger 迁移或保底 ⑤风险未签署不撤销报告 ⑥自主全 ✅ 无缺口可 FINAL ⑦任一 MACHINE PARTIAL 必 INTERIM ⑧控件 S/G>0 不得 FINAL且必须列稳定 ID ⑨外部不可达 UI 的计划控件进 G 且可 WITH-GAPS，不因 O<P-S 自动 INTERIM ⑩完全无缺口不得 WITH-GAPS。任一出现无状态/无出口等待=闸失败。
+判据：第一组是**审查候选，不是机械零命中**；命中若处于「禁止/不得/负例」等否定语境则安全，肯定授权/停止语境才违规。第二组语义逐项存在且形成闭环。桌面推演：①单角色凭据失效后独立 AUDIT 继续 ②无法截图时下一独立项继续（即逻辑 READY） ③预算耗尽先把 READY/WAITING 逐项转 BUDGET_EXHAUSTED，双空后 INTERIM+CLOSED ④写者失联接管含 trigger 迁移或保底 ⑤风险未签署不撤销报告 ⑥自主全 ✅ 无缺口可 FINAL ⑦任一 MACHINE PARTIAL 必 INTERIM ⑧控件 S/G>0 不得 FINAL且必须列稳定 ID ⑨外部不可达 UI 的计划控件进 G 且可 WITH-GAPS，不因 O<P-S 自动 INTERIM ⑩完全无缺口不得 WITH-GAPS。任一出现无状态/无出口等待=闸失败。
 
 
 ## 24. 拟人身份、连续旅程与用户语言
@@ -437,11 +437,11 @@ grep -nE 'ACTION|AC|SCENARIO|DOMAIN|GLOBAL|READY|WAITING|BUDGET_EXHAUSTED|OBSERV
 逐项核验：
 
 1. UAT 至少一条真实 persona 产品旅程，含动机/起点/连续步骤/交接/最终结果；DOC-only 只能 coverage-audit。
-2. 产品 AC 仅 UI/MACHINE；PRODUCT/AUDIT/MIXED 先分层，AUDIT 独立记已核/未核且不落纯未覆盖；DOC 退出 AC/场景/需求分子/分母/UAT 三态；MACHINE 有真机器契约和自身凭据。
+2. 产品 AC 仅 UI/MACHINE；PRODUCT/AUDIT/MIXED 先分层，AUDIT 独立记已核/未核且不落纯未覆盖；DOC 退出 AC/场景/需求分子/分母/UAT 三态；MACHINE 有真机器契约和自身凭据。人类 GUI 主界面可达时必须真实 GUI 事件，TUI/CLI/API 仅在该真实日常入口匹配目标时使用，不得图省事绕过。
 3. AC 挂靠与场景完成分开；禁止 G-DOM/管理员场景默认吞并全部 AC；矩阵闭合不代替旅程完成。
 4. 缺陷摘要含 persona+业务目标+真实入口+实际/预期结果；TECH-OBS 与 UAT 缺陷分离。
 5. 报告首节为关键旅程定性结论，不新增旅程通过率 KPI；覆盖/证据/未触只作审计。
-6. 单会话无长任务接管 schema；扩展任务只冻结所选 EXTENDED_UNATTENDED 规程。
+6. SINGLE_WRITER 默认含自主长任务内核且无并行接管 schema；PARALLEL_UNATTENDED 仅实际并行/接管时冻结扩展规程。
 7. ACG 常驻正文不包含技能研发治理；其归 maintainer-guide，不参与任务生成。
 
-负例必须分别覆盖：DOC 作为 AC、全 DOC FINAL、人类 CLI 标 MACHINE、G-DOM 关联全部 AC、控制台异常直接 UAT ❌、纯技术缺陷标题、SINGLE_SESSION 携带 fencingToken。任一漏拦=自检失效。
+负例必须分别覆盖：DOC 作为 AC、全 DOC FINAL、人类 CLI 标 MACHINE、GUI 主界面可达却图省事改用 API、G-DOM 关联全部 AC、控制台异常直接 UAT ❌、纯技术缺陷标题、SINGLE_WRITER 携带 fencingToken。任一漏拦=自检失效。

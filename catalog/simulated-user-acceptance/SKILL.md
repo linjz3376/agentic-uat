@@ -3,7 +3,7 @@ name: simulated-user-acceptance
 description: "Use when executing simulated user acceptance (UAT), persona-based end-to-end journeys, or organizing acceptance evidence and reports. Enforces entry fidelity: human GUI/TUI/CLI/API stays UI, while MACHINE is reserved for actual machine/external-system callers. Internal interfaces remain auxiliary. Execution runs on a bounded interaction control flow (fresh-perception contract, authoritative-layer verification, progress-proof retry ladder, intent binding, hard budget). Covers browser/Playwright/manual UI, scenario-first execution with risk priority, UI-primary evidence, L1/L2/L3 coverage, boundary derivation, blocked-attribution auditing with retest pull-up and bounded recovery, three-state reporting, artifact-tree gates, and machine-computed coverage metrics."
 license: MIT
 metadata:
-  version: "3.7.0"
+  version: "3.8.1"
   author: "linjz"
   platforms: "linux, macos, windows"
   category: [qa, uat, execution]
@@ -81,14 +81,16 @@ metadata:
 - 机器身份必须有真实产品契约，不能只因「没有页面」就成立。纯只读 MACHINE 不得为取证另造副作用。
 - 内部接口、DB、日志、源码永远不是 persona 产品入口，只能作预声明辅证或技术诊断。
 
+**GUI 拟人硬闸**：若人类 persona 的日常主界面是 GUI 且 GUI 可达，必须使用真实 GUI 事件（点击/逐键输入/选择/滚动/键盘/对话框）完成旅程。TUI/CLI/API 只有在确为该 persona 的日常真实入口且匹配业务目标时才可使用；不得为自动化方便、证据省事或绕过 UI 缺陷而替代 GUI。载体不能驱动 GUI 时按最小作用域 BLOCKED/偏离，不得把可用 GUI 错记为无入口。
+
 ### 执行模式（与测试风险档正交）
 
-| 模式 | 启用条件 | 本轮只需携带 |
+| 模式 | 启用条件 | 本轮携带 |
 |---|---|---|
-| SINGLE_SESSION | 单会话、单写者、无长窗等待 | 场景/当前步骤/下一动作/预算/证据/缺陷/最小断点 |
-| EXTENDED_UNATTENDED | 多回合、长窗、并行写者或无人值守接管 | 另带 `artifact-conventions.md` §6 的完整状态机、四队列、租约与收判契约 |
+| SINGLE_WRITER（默认） | 单写者自主执行，**短任务与长任务同权** | 逻辑 READY/WAITING/BLOCKED/DONE、当前步骤、下一动作、解除条件、一次性收判、超时、预算、副作用对账、证据和最小断点 |
+| PARALLEL_UNATTENDED | 实际存在并行写者或外部接管 | 另带 artifact §6 的写者租约、CAS、fencingToken、分片归并与触发器迁移 |
 
-普通任务不得携带租约、CAS、fencingToken 或多写者接管规程。长任务规则只有选择 EXTENDED_UNATTENDED 才冻结进任务书。
+单写者长窗可在同一任务范围与授权内原地 `RUNNING⇄WAITING` 续跑，**不重新生成任务书、不重复请示、不升级成并行模式**。文档轻量=按需展开字段，不是删除能力。租约/CAS/fencingToken 只与 PARALLEL_UNATTENDED 绑定，不再与长任务绑定。
 
 所有模式共用：阻塞作用域=`ACTION / AC / SCENARIO / DOMAIN / GLOBAL`，默认取保护安全与证据的最小一级；预算含全局/场景/AC/路径上限，至少预留 10% 或一个完整收判回合（取较大者）用于断点和报告。局部预算耗尽只冻结相关范围，全局耗尽转 BUDGET_EXHAUSTED 后必须出报告。
 
@@ -137,7 +139,7 @@ metadata:
 
 - 页面/路由/控件清单属于审计覆盖，不代表业务旅程完成。控件 P 执行前锁定；获接受 DEFERRED 进 S，其余计划缺口进 G=P−O−S，并带稳定 control_id+证据+归因，禁止事后改列抽样或 S。
 - 当前路径连续两次无验证进展→换层重观察→换路径→达到单项预算后终止当前路径。随后保全证据、缩小作用域、写断点并选择下一独立旅程/READY 项。
-- 没有可执行项时才收判或报告；SINGLE_SESSION 无长窗时不得创建常驻巡逻。SINGLE 遇长窗只记录升模式建议和最小断点，继续独立项；不能收判的受影响项转有归因 BLOCKED/INTERIM，不原地热切换，扩展任务由生成侧另出书并重取授权。EXTENDED_UNATTENDED 按契约收判，活动 WAITING 必须有一次性收判/解除事件/超时处置；无法安排立即转 BLOCKED，READY/WAITING 双空才 REPORTING。
+- 没有可执行项时才收判或报告；SINGLE_WRITER 无长窗时不得创建常驻巡逻。单写者遇长窗直接在同一任务书内登记 WAITING、解除条件、resumeAfter、超时和一次性收判，条件满足后回 READY；无触发能力或超时则转有归因 BLOCKED，继续其他独立项或出 INTERIM。**不重新生成、不重复授权、不切换并行模式。** PARALLEL_UNATTENDED 仅在真实并行/接管时按扩展契约处理，READY/WAITING 双空才 REPORTING。
 - CLOSED 只表示本轮执行停止且报告已签发，不表示产品全通过、缺陷修复或风险接受。
 
 ## 3 用户结果、证据与技术观察
@@ -162,7 +164,7 @@ metadata:
 | # | 检查 |
 |---|---|
 | 1–6 | UAT 至少一条真实 persona 产品旅程；DOC 未进 AC/场景/需求分子；MACHINE 有真机器契约；缺陷用户摘要格式完整；待定性与已定性字段齐 |
-| 7 | 产物按所选模式裁剪；SINGLE_SESSION 无租约/CAS/多写者接管；格式缺口只降 INTERIM，不阻止保底报告 |
+| 7 | 产物按所选模式裁剪；SINGLE_WRITER 仍含逻辑四态/WAITING/一次性收判/超时，但无租约/CAS/多写者接管；格式缺口只降 INTERIM，不阻止保底报告 |
 | 8–11 | BLOCKED 六类归因及证明；任一 PARTIAL、OMITTED/BUDGET_EXHAUSTED 均 INTERIM；补测任务单齐；UNREACHABLE 有限证明 |
 | 12–14 | 每关键目标有连续基本流、交接与最终结果；场景完成与 AC 挂靠分开；无域批吞并；入口主证和 G0/SBTM 齐 |
 | 15–16 | 三指标按内联公式机算或手工对账；任务书只含所选执行模式，外部版本不热切换 |
@@ -170,7 +172,7 @@ metadata:
 | 18 | 页面内容逐项落点或 N/A；TECH-OBS 与 UAT 缺陷分离 |
 | 19 | 传输文件与五要素齐；采集失败不阻止保底报告 |
 | 20 | 汇报前重读台账当前尾部，数字一致 |
-| 21 | SINGLE 核最小停止链：全部计划 AC DONE/BLOCKED、无待续/可执行独立项；EXTENDED 核 §6 状态机与双空；未 CLOSED 回合完成进度、登记、断点、收判或 N/A |
+| 21 | SINGLE_WRITER 核逻辑四态+长窗原地续跑+最小停止链：全部计划 AC DONE/BLOCKED、无待续/可执行独立项；PARALLEL_UNATTENDED 核 §6 状态机与双空；未 CLOSED 回合完成进度、登记、断点、收判或 N/A |
 | 22 | 中断动作三问与错误后 60 秒禁令齐 |
 | 23 | 判定·登记原子化，未登记判定清单为空 |
 
@@ -179,7 +181,7 @@ metadata:
 - 报告第一节固定为**关键旅程结论**，逐条写「persona｜业务目标｜实际连续路径｜完成/失败/受阻｜用户可见结果｜主证」。不新增旅程通过率 KPI，不用覆盖数字替代定性目标结论。
 - 第二节为用户语言缺陷与残余风险；第三节才是需求覆盖率、UI 主证覆盖率、未触率、页面/控件矩阵、TECH-OBS 和产物清单。
 - DOC 审计独立出 coverage-audit 报告，不进入 UAT FINAL/WITH-GAPS。
-- **三态共同前置**：所有计划产品 AC 均为 DONE 或六类 BLOCKED；SINGLE 另核最小断点无待续/可执行独立项且不创建队列，EXTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。
+- **三态共同前置**：所有计划产品 AC 均为 DONE 或六类 BLOCKED；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。
 - 三态仍按 INTERIM→FINAL-WITH-GAPS→FINAL 判定：任一 PARTIAL、OMITTED/BUDGET_EXHAUSTED、主证/计划产物/控件要件缺口先 INTERIM；存在合法外部 BLOCKED、未裁定 ⏸️ 或合法 S/G 才 WITH-GAPS；完全无缺口才 FINAL；UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应主证必须 100%。❌ 不阻止 FINAL，全项有证据的 ❌ 也可 FINAL。
 - 任何写树、命名、断链或预算问题仍须出保底报告：关键旅程结论、用户缺陷、逐 AC 状态、已有证据、偏差与下一步。不得写未授权目录。
 - 收口分执行结束、报告签发、风险接受、经验回灌；前两项完成即 CLOSED，后两项未答复不撤销报告。经验无项目写授权时只留建议。
@@ -189,6 +191,6 @@ metadata:
 - `reference/gui-tui-cli.md`：人类 GUI/TUI/CLI/API 与真机器入口边界。
 - `reference/boundary-derivation.md`、`method-coverage.md`：旅程深度、风险档、异常恢复和技术观察。
 - `reference/defect-classification.md`：用户语言缺陷、分类和 P 级。
-- `reference/artifact-conventions.md`：报告产物；§6 仅用于 EXTENDED_UNATTENDED 的状态机/契约/收判包。
+- `reference/artifact-conventions.md`：报告产物；§6.0 为所有模式共享的自主长任务内核，§6.1–6.4 的租约/CAS/fencing、物理队列、接管与收判包仅用于 PARALLEL_UNATTENDED。
 - `reference/tool-selection.md`、`runbook.md`：真实入口驱动能力与失效降级。
 - 生成侧分工：ACG `references/skill-interface.md`；任务书运行时不得依赖该指针。

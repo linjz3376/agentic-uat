@@ -10,8 +10,8 @@
 
 Agentic UAT is a two-skill methodology package for the AI-agent era of acceptance testing:
 
-- **acceptance-contract-governance** (v1.7.0) — turns "test feature X thoroughly" into a self-contained, executable acceptance-instruction document: AC-ID'd verification points with entry paths (`[UI]`/`[MACHINE]`), scenario modeling, four live sources of test basis (PRD cross-cut + defect ledger + live UI/endpoint recon + eleven-dimension depth drill), machine-checkable coverage metrics, and a final-report gate.
-- **simulated-user-acceptance** (v3.7.0) — executes those instructions as real users: persona-based end-to-end journeys, bounded interaction control flow, UI-primary evidence, L1/L2/L3 coverage, blocked-attribution auditing (UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED), three-state reporting (FINAL / FINAL-WITH-GAPS / INTERIM), and artifact-tree gates.
+- **acceptance-contract-governance** (v1.8.1) — turns "test feature X thoroughly" into a self-contained, executable acceptance-instruction document: AC-ID'd verification points with entry paths (`[UI]`/`[MACHINE]`), scenario modeling, four live sources of test basis (PRD cross-cut + defect ledger + live UI/endpoint recon + eleven-dimension depth drill), machine-checkable coverage metrics, and a final-report gate.
+- **simulated-user-acceptance** (v3.8.1) — executes those instructions as real users: persona-based end-to-end journeys, bounded interaction control flow, UI-primary evidence, L1/L2/L3 coverage, blocked-attribution auditing (UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED), three-state reporting (FINAL / FINAL-WITH-GAPS / INTERIM), and artifact-tree gates.
 
 **What it is not**: this is not a testing framework for agent harnesses, and not a unit-test generator. It is a *methodology* for letting AI agents do the walking of user-acceptance testing while humans keep judgment.
 
@@ -61,7 +61,8 @@ The skills make three hard requirements of the execution agent — any harness m
 
 - Human-first judgment: human GUI/TUI/CLI/API workflows stay UI; machine callers use their product contract; internal APIs remain auxiliary
 - Persona-journey core: human GUI/TUI/daily CLI/API stays UI; MACHINE is only for actual machine callers; DOC reconciliation is a separate audit, never UAT evidence
-- Scoped execution profiles: SINGLE_SESSION carries only a minimal checkpoint; EXTENDED_UNATTENDED adds queues, leases, triggers and recovery only when needed
+- Scoped execution profiles: SINGLE_WRITER always includes the autonomous long-task core and one-shot resumption; PARALLEL_UNATTENDED adds leases/CAS/fencing only for actual parallel writers or external takeover
+- GUI fidelity: when a human persona's primary GUI is reachable, real GUI events are mandatory; CLI/API cannot be used merely to ease automation or bypass UI defects
 - Bounded autonomy: fresh-perception contract, authoritative-layer verification, progress-proof retry ladder, hard budgets — every task terminates
 - Machine-checkable quality gates: coverage metrics computed, not vibes; docs-drift and attribution audited
 - Carrier-neutral: works with any AI execution agent that can receive task injection (CLI headless, IDE automation, client APIs); OpenCode is one example carrier, not a dependency
@@ -102,14 +103,14 @@ skills/   the two skills (directory form, portable)
 catalog/  HTTP catalog (index.json + per-skill files) for Route A
 ```
 
-Skill versions inside this package: acceptance-contract-governance 1.7.0, simulated-user-acceptance 3.7.0. Package semver tracks the bundle; skill changelogs carry their own history.
+Skill versions inside this package: acceptance-contract-governance 1.8.1, simulated-user-acceptance 3.8.1. Package semver tracks the bundle; skill changelogs carry their own history.
 
 ## 中文
 
 Agentic UAT 是 AI 智能体时代的验收测试双技能方法学包：
 
-- **acceptance-contract-governance**（v1.7.0）——把「重点测 XX」变成自包含可执行的验收任务书：AC-ID 化验证点（带 `[UI]`/`[MACHINE]` 入口判定路径）、场景建模、test basis 四活源（PRD 横切+缺陷台账+现行侦察+十一维加钻）、机验覆盖度量、收官闸
-- **simulated-user-acceptance**（v3.7.0）——以真实用户身份执行任务书：persona 端到端旅程、有界交互控制流、UI 主证、L1/L2/L3 覆盖、受阻归因审计（UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED）、三态报告、产物树闸门
+- **acceptance-contract-governance**（v1.8.1）——把「重点测 XX」变成自包含可执行的验收任务书：AC-ID 化验证点（带 `[UI]`/`[MACHINE]` 入口判定路径）、场景建模、test basis 四活源（PRD 横切+缺陷台账+现行侦察+十一维加钻）、机验覆盖度量、收官闸
+- **simulated-user-acceptance**（v3.8.1）——以真实用户身份执行任务书：persona 端到端旅程、有界交互控制流、UI 主证、L1/L2/L3 覆盖、受阻归因审计（UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED）、三态报告、产物树闸门
 
 **不是什么**：不是测 agent 脚手架的框架，不是单测生成器——是「让 AI 执行体跑验收、人类只做裁判」的方法学。
 

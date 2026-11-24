@@ -1,6 +1,6 @@
 # 执行报告正样例（虚构）
 
-报告头：任务=GAP-DEMO；环境=UAT；执行模式=EXTENDED_UNATTENDED；无授权偏离。
+报告头：任务=GAP-DEMO；环境=UAT；执行模式=PARALLEL_UNATTENDED；无授权偏离。
 
 ## 第一节：关键旅程结论
 

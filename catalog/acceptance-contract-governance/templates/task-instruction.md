@@ -10,8 +10,9 @@
 - 对账摘要：需求 N 条→覆盖 K/⏭️ P/⏸️ Q/纯未覆盖 0
 - 报告根：`<获准 report-root>`；产物 profile：`<布局/扩展>`，不得降低本任务书安全、主证和三态约束
 - UAT 身份：至少一条真实 persona 产品旅程，含动机/起点/连续步骤/交接/最终入口结果；DOC-only 不得称 UAT。
-- 执行模式：`SINGLE_SESSION` / `EXTENDED_UNATTENDED`。前者仅写场景、当前步骤、下一动作、预算、证据、缺陷和最小断点；后者由生成侧完整内联扩展契约，不留外部指针。
-- 最小断点：execution-log 记录 persona/场景/AC/步骤/下一动作/预算消耗/副作用 ID/证据；恢复先核权威状态再续跑。
+- 执行模式：默认 `SINGLE_WRITER`，始终含共享状态机、逻辑 READY/WAITING/BLOCKED/DONE、当前步骤、下一动作、解除条件、resumeAfter、一次性收判、超时、预算、副作用对账、证据和最小断点；长窗原地续跑，不另出书/重复授权。只有真实并行写者/外部接管才选 `PARALLEL_UNATTENDED`，由生成侧内联扩展契约，不留外部指针。
+- 共享状态机：PREFLIGHT→RUNNING⇄WAITING；收判后 READY/WAITING 双空→REPORTING→CLOSED；全局 NO_GO/预算支路先将有待续项转有归因 BLOCKED。
+- 最小断点：execution-log 记录 persona/场景/AC/逻辑状态/步骤/下一动作/收判与超时/预算消耗/副作用 ID/证据；恢复先核权威状态再续跑。
 
 ## 0 用户场景、角色与页面清单
 
@@ -85,7 +86,7 @@
 
 ### 2.2 人机批次、迟发依赖与窗口包
 
-窗口包/一次性收判仅 EXTENDED_UNATTENDED 启用。SINGLE_SESSION 遇长窗只记录升模式建议+最小断点，继续独立项；不能收判的受影响项转有归因 BLOCKED/INTERIM，不原地热切换；需要扩展时由生成侧另出自包含任务书并重取授权。SINGLE 输出删除窗口包/triggerId 等扩展行，不留 N/A 骨架。
+一次性收判是所有模式的基础能力。SINGLE_WRITER 遇长窗直接在 execution-log 登记 WAITING/解除条件/resumeAfter/超时/triggerId，条件满足回 READY；无触发能力或超时则转有归因 BLOCKED，继续独立项或 INTERIM，不另出书、不重复授权。PARALLEL_UNATTENDED 仅真实并行/接管时增加窗口包、租约、分片和触发器迁移。
 
 | 类型 | 动作/依赖 | 影响 AC/场景 | 解除条件与截止 | 兜底与一次性收判 |
 |---|---|---|---|---|
@@ -102,6 +103,7 @@
 | <AC-ID> | <正/负> | <`[UI]` 或 `[MACHINE]` 首令牌+真实旅程步骤> | <可判定；主观项人工核对清单> | <该入口主证> | <可选> | <⛔/⏭️/⏸️/-/风险档> |
 
 - `[UI]` 覆盖人类 GUI/TUI/日常 CLI/API：GUI 写控件/对话框/回显并留截图/DOM；TUI/CLI 留终端读屏/输出；人类 API 留调用方可见响应+最终业务结果。
+- **GUI 拟人硬闸**：人类 persona 的日常主界面为 GUI 且可达时，必须真实点击/逐键输入/选择/滚动/键盘/对话框完成旅程；TUI/CLI/API 只有确为日常真实入口且匹配目标才可用，不得为自动化方便或绕过 UI 缺陷而替代。
 - `[MACHINE]` 仅用于产品明确交付的机器/外部系统调用方，使用自身凭据和公开契约；写业务错误码/鉴权/关键字段，有状态变更时另核幂等/副作用，纯只读不得造副作用。无 UI/管理员/习惯 CLI 不是 MACHINE 依据。
 - DOC 对账放独立审计表，使用 AUDIT-ID，不用 AC、不挂场景、不计需求验证分子、不参与 UAT 三态。
 - 内部接口、DB、日志、源码只作辅证/TECH-OBS；人类 persona 不得用内部 API 替代真实界面旅程。
@@ -141,10 +143,10 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 
 ## 5 完成准则（CLOSED 最小条件，不要求全 PASS）
 
-- [ ] 每个产品 AC 为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类归因 BLOCKED；EXTENDED_UNATTENDED 另核 READY=0、WAITING=0，SINGLE_SESSION 不创建队列 schema。
-- [ ] 判定·登记原子化，未登记清单为空；最小断点已更新，扩展模式另更新四队列。
+- [ ] 每个产品 AC 为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类归因 BLOCKED；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0，SINGLE_WRITER 在 execution-log 保留逻辑四态，不创建并行写者契约。
+- [ ] 判定·登记原子化，未登记清单为空；最小断点已更新，PARALLEL_UNATTENDED 模式另更新物理四队列。
 - [ ] 报告已签发；产物格式失败也签保底报告。
-- [ ] 回合收尾：进度对账、登记清零、断点更新、一次性收判或 N/A；扩展模式使用四件套，单会话无长窗不排程。
+- [ ] 回合收尾：进度对账、登记清零、断点更新、一次性收判或 N/A；PARALLEL_UNATTENDED 模式使用扩展四件套；SINGLE_WRITER 无长窗不排程，有长窗必须使用一次性收判。
 
 ### 报告判定输入（缺口决定 INTERIM，不反向阻止 CLOSED）
 
@@ -166,7 +168,7 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 8. 标准冲突时实测照做、相关 AC ⏸️；证据按截图→DOM→NET→TIME 留证。已见结果缺主证最高 PARTIAL，完全无法观察记 OBSERVABILITY_BLOCKED。
 9. 主旅程 L1、关键数据 L2、授权/安全/恢复 L3；共享字段边界去重，Pairwise/状态矩阵按适用风险选择。
 10. 当前路径两次无进展→换层→换路径→单项预算后终止当前路径；保全证据、缩小作用域、写最小断点并选择下一独立项，禁止全轮空等。
-11. SINGLE_SESSION 只保留当前场景/AC/步骤/下一动作/预算/证据/缺陷，无租约/CAS/多写者接管。只有头部为 EXTENDED_UNATTENDED 时，才使用本任务书已内联的扩展契约和收判规则。
+11. SINGLE_WRITER 默认保留逻辑四态、长窗 WAITING、一次性收判、超时和最小断点，可原地续跑，不另出书/重复授权；无租约/CAS/多写者接管。只有真实并行/外部接管且头部为 PARALLEL_UNATTENDED 时，才使用已内联扩展契约。
 12. OMITTED 先补预算内独立项；不能补则任务单+INTERIM，可 CLOSED。UNREACHABLE 只需两次无进展+换层+换路径/排除依据+单项预算+原始记录。
 13. 自残闸：cancel/stop/重启/接管性发送前查在途、选最小动作、评估不动手选项；错误后 60 秒禁中断。裸杀永远禁止，secrets 仅受控注入。
 14. 控件 P 执行前锁定；获接受 DEFERRED 进 S，其余未操作计划项进 G=P−O−S 并逐控件归因；禁止事后改列抽样或 S。控件数量只作审计，不代替旅程完成。
@@ -239,7 +241,7 @@ AUDIT 条目不进入上表。DOC-only 使用 AUDIT-ID 在下表记已核/未核
 
 报告头只含任务 ID、环境、运行状态、授权/偏离。第一节=关键旅程定性结论；第二节=用户语言缺陷与残余风险（无缺陷写无）；第三节起=需求覆盖率/UI 主证覆盖率/未触率、场景/控件矩阵、TECH-OBS 和产物清单。机算优先，无工具按内联公式手工对账留痕；分母 0=N/A+理由。
 
-UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻结论，DOC 不进 AC/需求分子/三态。所有模式共同前置=每个计划产品 AC 为 DONE 或六类 BLOCKED；SINGLE 另核最小断点无待续/可执行独立项且不创建队列，EXTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序判定：
+UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻结论，DOC 不进 AC/需求分子/三态。所有模式共同前置=每个计划产品 AC 为 DONE 或六类 BLOCKED；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项且不创建并行写者契约，PARALLEL_UNATTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序判定：
 1. INTERIM：任一入口 PARTIAL；或 OMITTED/BUDGET_EXHAUSTED；或主证/计划产物缺口；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或 S/G 缺稳定 ID、证据、合法映射。可 CLOSED。
 2. FINAL-WITH-GAPS：不满足 INTERIM且存在 BLOCKED/未裁定 ⏸️/S/G；BLOCKED 全为 UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED 或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射。无缺口不得本态。
 3. FINAL：不满足前两类；BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时 N/A 或主证 100%、计划产物完整、S+G=0 且 O=P。❌ 不阻止 FINAL；自主全项无缺口也可 FINAL。
@@ -255,7 +257,7 @@ UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻�
 ├─ coverage-audit-<date>.md（DOC-only/独立审计；非 UAT 三态）
 ├─ evidence/
 ├─ imports/ 与 exports/（有传输时）
-├─ obs/contract.md（仅 EXTENDED_UNATTENDED）
+├─ obs/contract.md（仅 PARALLEL_UNATTENDED）
 ├─ obs/control-matrix.json（有 UI 时）
 ├─ obs/results.json（采用机算文件时）
 ├─ cleanup-list.md（有清场债务时）

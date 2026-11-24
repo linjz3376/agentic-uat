@@ -7,6 +7,14 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.8.1 并行模式残留清理批
+
+双模板与 self-check 精确使用 SINGLE_WRITER/PARALLEL_UNATTENDED；共同前置、物理队列、四件套和样例索引不再使用 SINGLE/EXTENDED 旧称。negative-focus 明确只拦单写者误带并行 schema；缺字段负例标 PARALLEL_UNATTENDED。独立复核最后一处 EXTENDED 残留已修复。frontmatter description/routing 不变，仅补丁版本步进。
+
+## 1.8.0 单写者长任务与 GUI 拟人硬闸批
+
+执行模式改 SINGLE_WRITER 默认+PARALLEL_UNATTENDED 仅真实并行/接管：单写者默认内联共享状态机、逻辑四态、长窗解除/收判/超时、最小断点和副作用对账，长窗原地续跑，不另出书/重复授权；租约/CAS/fencing 仅并行接管。双模板/扩展生成块/self-check/样例同步。新增 GUI 硬闸：日常主界面 GUI 可达即必须真实 GUI 事件，CLI/API 仅在真实日常入口且匹配目标时使用，不得图方便绕过；聚焦正例新增 GUI 取消+确认旅程，聚焦负例新增 GUI_BYPASS。frontmatter description/routing 不变。
+
 ## 1.7.0 拟人旅程与执行模式分层批
 
 产品 AC 仅 UI/MACHINE：UI 包含人类 GUI/TUI/日常 CLI/API，MACHINE 仅真实机器调用方；DOC 改 AUDIT-ID 独立审计，退出 AC/场景/需求分子/UAT 三态。任务书强制真实 persona 连续旅程，禁止 G-DOM/管理员场景吞并全部 AC，场景完成与矩阵闭合分开。执行模式分 SINGLE_SESSION/EXTENDED_UNATTENDED，新增 extended-unattended-appendix 生成块，普通任务不再冻结租约/CAS/接管。报告首节为关键旅程定性结论；缺陷摘要强制用户语言，技术巡检归 TECH-OBS。技能研发治理移 maintainer-guide，不参与任务生成。同步正文、双模板、executable/provenance/coverage/depth/pitfalls/interface/self-check 和聚焦负样例。

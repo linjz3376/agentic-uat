@@ -1,8 +1,9 @@
 # 拟人聚焦负样例（虚构，应被 §24 拦截）
 
-- 执行模式：SINGLE_SESSION，却携带 fencingToken、leaseEpoch、CAS 和多写者接管。
+- 执行模式：SINGLE_WRITER，却携带 fencingToken、leaseEpoch、CAS 和多写者接管。
 - G-DOM-<域> 场景默认关联该域全部 AC，没有单一业务目标或连续基本流。
 - 人类管理员使用日常 CLI，却标 `[MACHINE]`，仅因没有页面。
+- 归档员的日常主界面 GUI 可达，却仅为自动化方便改用 API 直接提交，未执行真实 GUI 事件。
 - 控制台出现 TypeError，未关联任何 persona 入口结果，直接形成 UAT ❌。
 - 缺陷标题只有「缓存未失效」，没有 persona、业务目标和入口可见结果。
 

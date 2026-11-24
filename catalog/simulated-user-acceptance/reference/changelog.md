@@ -6,6 +6,14 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 3.8.1 自主长任务边界残留清理批
+
+清理 3.8.0 改名后的局部残留：obs/contract 注释与职责仅 PARALLEL_UNATTENDED；所有模式始终记录逻辑 READY/WAITING/BLOCKED/DONE；§7 指针明确 §6.0 为共享自主长任务内核、§6.1–6.4 为并行契约；runbook/tool 统一为逻辑 READY。独立复核五组残留全部 CLOSED。frontmatter description/routing 不变，仅补丁版本步进。
+
+## 3.8.0 自主长任务基础能力与 GUI 硬闸批
+
+执行模式改 SINGLE_WRITER 默认+PARALLEL_UNATTENDED 仅真实并行/接管：单写者短长任务同权，始终含共享状态机、逻辑 READY/WAITING/BLOCKED/DONE、解除条件、resumeAfter、一次性收判、超时、预算、副作用对账和最小断点；长窗在同任务/授权内原地续跑，不重新生成、不重复授权、不升级并行。租约/CAS/fencing 仅并行接管。新增 GUI 拟人硬闸：人类日常主界面为 GUI 且可达时必须真实点击/逐键输入/选择/滚动/键盘/对话框，CLI/API 不得为自动化方便或绕过 UI 缺陷替代。同步 artifact/runbook/tool/gui 与报告模式闸；description/routing 不变。
+
 ## 3.7.0 拟人验收内核收敛批
 
 重建 UAT 身份与入口边界：UI 覆盖人类 GUI/TUI/日常 CLI/API，MACHINE 仅真实机器/外部系统调用方，DOC 退出产品 AC/场景/需求验证分子/UAT 三态。新增真实 persona 卡、连续业务旅程、起点/交接/最终结果、场景完成与 AC 挂靠分离；禁止域批吞并全部 AC。缺陷摘要强制 persona+目标+入口+实际/预期，内部巡检归 TECH-OBS。执行模式分 SINGLE_SESSION 与 EXTENDED_UNATTENDED，普通任务不携带租约/CAS/多写者接管；长任务完整状态机仍由 artifact §6 持有。报告首节给关键旅程定性结论，不新增旅程通过率 KPI。同步 gui/method/defect/artifact references；description 同步人类 GUI/TUI/CLI/API 与真机器边界，examples/cues 保持基线；路由 train 36/36、held-out 16/16。

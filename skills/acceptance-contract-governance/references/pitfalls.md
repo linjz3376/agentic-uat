@@ -47,6 +47,6 @@
 - 域批吞并全部 AC：G-DOM/管理员场景关联全部 AC 只证明矩阵闭合；每个关键业务目标必须有连续基本流、交接和最终用户结果。
 - 人类技术入口误标 MACHINE：人类管理员/运维/开发者日常 CLI/API 仍属 UI；MACHINE 仅产品明确交付的机器/外部系统调用方。
 - 技术信号直接判 UAT 缺陷：控制台/日志/网络/内部数据先记 TECH-OBS；无 persona 入口承诺失败关联不得形成 UAT ❌。
-- 单会话携带长任务 schema：SINGLE_SESSION 不得出现租约/CAS/fencing/多写者接管；只有 EXTENDED_UNATTENDED 才冻结完整扩展契约。
+- 单写者误带并行 schema：SINGLE_WRITER 不得出现租约/CAS/fencing/多写者接管，但必须含共享状态机/逻辑四态/长窗收判/超时；PARALLEL_UNATTENDED 仅实际并行/接管使用。不得以文档轻量为名删除自主长任务能力。
 - 缺陷只有技术标题：每条缺陷摘要必须含 persona+业务目标+真实入口+实际/预期结果，技术根因另列。
 
