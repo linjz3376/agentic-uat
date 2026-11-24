@@ -3,7 +3,7 @@ name: acceptance-contract-governance
 description: "Use when 交付物是测试验收文档：验收点表（AC-ID 化）、测试任务书（块级/全域）、验收契约及其覆盖对账（test basis 四活源、需求归宿四桶）、验收契约治理（29119-3 拆分、历史污染清理）。范围路由：模块名→块级任务书；全项目/全域/全流程→全域轮。"
 license: MIT
 metadata:
-  version: "1.5.39"
+  version: "1.5.40"
   author: "linjz"
   platforms: "linux, macos, windows"
   tags: [qa, uat, acceptance, contract, test-plan, governance]
@@ -13,7 +13,7 @@ metadata:
     artifacts: [acceptance-contract, test-task-book, test-plan, coverage-report]
     examples:
       - 生成一份全项目测试任务书（全域轮）
-      - 生成模拟用户验收任务书
+      - 生成模拟用户验收测试任务书
       - 给这个模块安排测试任务（块级）
       - 修订现有任务书并补齐覆盖
       - 这份任务书的验收点够不够全
