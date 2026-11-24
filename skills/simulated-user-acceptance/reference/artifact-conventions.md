@@ -7,10 +7,11 @@
 
 ```text
 <report-root>/                        # 默认 tests/reports/<YYYY-MM-DD>-<domain>/
-├─ execution-log.md                   # 必需：环境/预算/四队列/逐 AC/偏离
+├─ execution-log.md                   # 必需：环境/预算/最小断点/逐 AC；四队列仅扩展模式
 ├─ defects.md                         # 必需：已定性+待定性+风险接受+阻塞
 ├─ final-report.md                    # FINAL / FINAL-WITH-GAPS
 ├─ interim-report-<YYYY-MM-DD>.md     # INTERIM，与 final 二选一
+├─ coverage-audit-<YYYY-MM-DD>.md      # 独立 DOC 审计；非 UAT 报告
 ├─ defect-ledger-<YYYY-MM-DD>.md      # 有台账义务时必需： dated snapshot
 ├─ evidence/                          # 必需；无能采集时含失败记录
 ├─ imports/                           # 有上传动作时必需
@@ -34,7 +35,7 @@
 
 | 文件 | 必须包含 | 禁止包含 |
 |---|---|---|
-| `execution-log.md` | 环境闸、授权清单引用、预算及消耗、运行状态、四队列、逐 AC 状态/层级/实际/证据/缺陷、造数登记、恢复记录 | 大段报告正文；凭据 |
+| `execution-log.md` | 环境闸、授权引用、执行模式、预算、最小断点、逐 AC 状态/证据/缺陷、造数与恢复；四队列仅 EXTENDED_UNATTENDED | 大段报告正文；凭据；SINGLE 伪造四队列 |
 | `defects.md` | 已定性表、待定性表、统计、风险接受清单、阻塞项、该轮新增十段式副本 | 无留痕关闭项；凭据 |
 | `final-report.md` | 报告状态、未触核验、总览/域/维度、缺陷、对账、残留、结论 | 与当前 interim 并存 |
 | `interim-report-<date>.md` | 未触/预算/证据缺口、补测任务单、已完成结论、final 暂缓原因 | 冒充产品已验收 |
@@ -92,13 +93,13 @@ interim-report-<YYYY-MM-DD>.md；同日多份追加 -2、-3 并登记
 
 ### 4.3 报告三态（共同前置+顺序判定）
 
-共同前置：READY=0、WAITING=0，所有 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED。按顺序取首个命中：
+UAT 身份前置=至少一条真实 persona 产品旅程有定性结论，DOC 不参与。所有模式共同前置=每个计划产品 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED。SINGLE_SESSION 另核最小断点无待续动作且无仍可执行独立项，不创建 READY/WAITING/四队列；EXTENDED_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序取首个命中：
 
 | 顺序 | 条件 | 状态 | 文件 |
 |---:|---|---|---|
 | 1 | 任一入口 PARTIAL；或 OMITTED/BUDGET_EXHAUSTED；或 UI 主证/计划产物缺口；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或任一 S/G 缺稳定 ID、证据或合法映射 | INTERIM | `interim-report-<date>.md` |
 | 2 | 不满足 INTERIM，且存在至少一个 BLOCKED/未裁定 ⏸️/控件 S/G；BLOCKED 全为合法外部归因或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射 | FINAL-WITH-GAPS | `final-report.md`，头部声明全部 BLOCKED/⏸️/S/G 缺口 |
-| 3 | 不满足前两类；BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS 主证 100%、计划产物完整、S+G=0 且 O=P | FINAL | `final-report.md` |
+| 3 | 不满足前两类；BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应入口主证=100%、计划产物完整、S+G=0 且 O=P | FINAL | `final-report.md` |
 
 - ❌ 不阻止 FINAL：产品失败不等于执行未完成。
 - 自主模式全项有证据且无缺口可 FINAL；有未裁定 ⏸️、外部 BLOCKED 或合法控件缺口时不得 FINAL。只有 ⏸️ 或 S/G、没有 BLOCKED 也可 FINAL-WITH-GAPS；完全没有缺口时禁止 WITH-GAPS。
@@ -124,11 +125,13 @@ BLOCKED → 归因审计
 
 ### 5.1 报告必须有的三张执行表
 
+**身份与叙事前置**：UAT 报告至少一条真实 persona 产品旅程，否则只能 coverage-audit。报告首节先列「persona｜业务目标｜实际连续路径｜完成/失败/受阻｜用户可见结果｜主证」，不设旅程通过率 KPI；DOC 不进 AC/场景/需求分子/UAT 三态，TECH-OBS 与 UAT 缺陷分开。
+
 1. **场景完成表**：S-ID/persona/基本流/备选流/异常流/交接/挂靠 AC/完成状态/证据；每场景一句「作为 persona，我能/不能完成业务目标」。
-2. **入口证据表**：UI AC 数/PASS 数/有判定时 UI 主证的 PASS 数/覆盖率；MACHINE、DOC 分别列契约证据与对账证据。
+2. **入口证据表**：仅列 UI 与 MACHINE；UI 记 AC 数/PASS 数/有对应入口主证的 PASS 数/覆盖率，MACHINE 列契约证据。DOC 对账只进 coverage-audit，UAT 报告最多附「不计入 UAT」的明确链接。
 3. **G0/SBTM 记录**：时间盒、四栏笔记、新增 B 点/缺陷/未覆盖。
 
-规则：UI PASS 无判定时截图/DOM→降 PARTIAL；MACHINE PASS 须有契约响应与内容断言，状态变更语义另核可观察副作用，纯只读不得为取证造副作用；DOC 只判对账，不判产品功能。事后补证保留事实但不升级原判定。
+规则：UI PASS 必须有该形态对应主证——GUI=判定时截图/DOM，TUI/CLI=终端读屏/输出，人类 API=调用方可见响应+最终业务结果；缺对应主证才降 PARTIAL。MACHINE PASS 须有契约响应与内容断言，状态变更另核副作用，纯只读不得造副作用；DOC 只在独立 coverage-audit 判对账。事后补证保留事实但不升级原判定。
 
 ### 5.2 产物完整性与保底报告
 
@@ -153,7 +156,7 @@ BLOCKED → 归因审计
 4. BLOCKED 清单：归因、证明、解除条件、影响。
 5. 补测审计：OMITTED、预算耗尽、已补测、残余 PENDING 及任务单。
 6. L1/L2/L3、计划 B 点执行率、方法覆盖回执。
-7. 缺陷双口径统计、明细、风险接受清单。
+7. 用户语言缺陷（persona+目标+入口+实际/预期）、双口径统计、风险接受；TECH-OBS 单列。
 8. 路由、需求、不变量、数量对账。
 9. 残留数据与清场。
 10. 缺陷集群、下轮建议、未覆盖和残余风险。
@@ -165,7 +168,23 @@ BLOCKED → 归因审计
 
 控件统一按稳定 `control_id` 去重，动作行数不等于控件数：`I`=范围内清单控件数，`P`=执行前锁定的计划操作控件数，`O`=P 中完成有效操作的唯一控件数（计划外操作另列），`S`=P 中获接受 DEFERRED 的唯一控件数，`G=P\(O∪S)`=其余计划缺口的唯一控件集合。必须满足 P=O+S+G，O/S/G 互斥。未授权、不可达、观测受限未操作项进 G 并带对应归因，不得挤入 S。清单覆盖率=已落 AC/N/A 的唯一控件数/I；操作率同时展示原始 O/P 与 `O/(P-S)`，分母 0 标 N/A+理由，不得只展示扣除后的 100%。DOM、a11y、视觉按稳定键合并，a11y 只提供差集线索。
 
-## 6 执行契约与收判包 schema
+## 6 执行契约与收判包 schema（仅 EXTENDED_UNATTENDED）
+
+### 6.0 模式边界与状态机
+
+- SINGLE_SESSION：单会话/单写者/无长窗，只保留场景、AC、当前步骤、下一动作、预算、证据、缺陷和最小断点；不创建 obs/contract，不携带租约/CAS/fencing/四队列。最小停止链=当前动作完成或最小作用域 BLOCKED→继续下一独立项→全部计划产品 AC 为 DONE/BLOCKED 且无待续/可执行独立项→REPORTING→CLOSED。
+- EXTENDED_UNATTENDED：有多回合、长窗、并行写者或无人值守接管时才启用本节完整规范；任务书只冻结实际所选模式。
+
+```text
+PREFLIGHT → RUNNING ⇄ WAITING
+PREFLIGHT/RUNNING/WAITING → GLOBAL_NO_GO → REPORTING → CLOSED
+RUNNING/WAITING → BUDGET_EXHAUSTED → REPORTING → CLOSED
+RUNNING/WAITING ──收判完成且 READY=0、WAITING=0──→ REPORTING → CLOSED
+```
+
+WAITING 解除未判→READY，收判完成→DONE，失败/超时→BLOCKED；携带 WAITING 不得 CLOSED。活动 WAITING 必须有一次性收判、可验证解除事件与超时处置；收判安排只有本轮无 WAITING/长窗项才可为 N/A。无法安排收判时立即转有归因 BLOCKED，继续其他 READY 或出 INTERIM，不得保持无出口 WAITING。进入全局支路先把剩余 READY/WAITING 逐项转有归因 BLOCKED。DONE 仅含 ✅/❌/PARTIAL/⏭️/⏸️，已判数=DONE+BLOCKED。
+
+当前动作受阻后：保全证据→判定最小作用域→登记原因/依赖→写断点→移动队列→选择下一个 READY。READY 内先关键业务目标与高风险，再按任务书旅程次序；不得沿原路径空转。READY/WAITING 均空才进入 REPORTING。
 
 ### 6.1 契约字段
 
@@ -181,7 +200,7 @@ BLOCKED → 归因审计
 8. **预算**：全局/场景/AC/路径上限、已消耗、墙钟截止、报告预留。
 9. **用例间基线**：仅校验会影响下一场景证据或状态的在途、pending ask、队列和数据基线；无关偏离登记后不得阻塞。
 10. **最后新鲜观察与恢复点**：权威源、时间戳、证据路径、最近完整日志序号。
-11. **收判安排**：一次性 triggerId、resumeAfter、解除条件；无则 N/A。
+11. **收判安排**：一次性 triggerId、resumeAfter、解除条件、超时处置；仅无 WAITING/长窗项时可 N/A。
 12. **报告状态与外部待办**：报告路径/签发时刻；风险接受、经验回灌单独标记，不参与执行 CLOSED 判定。
 
 ### 6.2 每个未完成 AC 的断点字段

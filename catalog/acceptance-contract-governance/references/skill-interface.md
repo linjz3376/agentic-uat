@@ -15,10 +15,10 @@
 
 | 维度 | Owner | 协作界面 |
 |---|---|---|
-| 覆盖范围、风险档、判据 | ACG | 有 PRD 从 PRD；无 PRD 从现行侦察+明确承诺+可点名惯例；历史契约禁作基底 |
-| 运行状态机、五级阻塞、四队列、预算与停止 | SUA | ACG 生成时完整内联冻结快照 |
+| 覆盖范围、风险档、判据 | ACG | 产品 AC 仅 UI/MACHINE；DOC 用 AUDIT-ID 独立审计，不进需求验证分子/UAT 三态；历史契约禁作基底 |
+| 拟人旅程、预算、停止与执行模式 | SUA | 所有任务书冻结核心；SINGLE_SESSION 只带最小断点，EXTENDED_UNATTENDED 才内联状态机/四队列/租约/收判/接管 |
 | 授权矩阵 | SUA + 项目/全局安全红线 | ACG 生成授权清单；操作者显式确认范围，项目更严规则优先 |
-| 场景模型 | ACG | SUA 场景优先；缺失时补最小模型并记生成缺陷，不盲停 |
+| 场景模型 | ACG | 每关键业务目标有连续基本流/交接/最终结果；禁止域批吞并全部 AC；场景完成与 AC 挂靠分开 |
 | 报告三态、保底报告、产物核心约束、命名 | SUA | ACG 固化快照；任务书仅选合法 profile/扩展 |
 | 覆盖公式 | ACG `coverage-metrics.md` | 任务书内联公式；SUA 不另定义分子分母 |
 | 缺陷分类与 BLOCKED 六类归因 | SUA | 项目台账持状态；报告签发不等待缺陷修复 |
@@ -27,7 +27,7 @@
 
 ## 3 静态快照协议
 
-1. 生成时读取 SUA 当前规范，将状态机、授权、判据、报告、产物和契约 schema 全部内联，记录静态出处和内容哈希。
+1. 生成时读取 SUA 当前规范，将拟人核心与本轮所选执行模式内联，记录静态出处和哈希；SINGLE_SESSION 不带长任务 schema，EXTENDED_UNATTENDED 才内联完整契约。
 2. 运行时只读任务书；不得出现「执行期以当前版本为准」。宿主更严安全红线始终从严，其他外部更新不热切换。
 3. 外部差异只记录；影响判据真值时相关 AC 实测后 ⏸️，其他 READY 项继续，报告按内嵌规则签发。
 4. 产物优先级=SUA 核心约束>任务书合法 profile/扩展>默认布局；任务书不能豁免 UI 主证、安全或报告底线。
@@ -37,8 +37,8 @@
 ```text
 操作者意图与授权范围
   → ACG：源头对账→风险/预算→场景与 AC→内联冻结规范
-  → SUA：PREFLIGHT→RUNNING/WAITING→局部阻塞与 READY 续跑
-  → REPORTING→CLOSED（FINAL / FINAL-WITH-GAPS / INTERIM）
+  → SUA：按 SINGLE_SESSION/EXTENDED_UNATTENDED 执行真实连续旅程→局部受阻续跑
+  → 报告首节给关键旅程定性结论→CLOSED（FINAL / FINAL-WITH-GAPS / INTERIM）
   → 独立后续：缺陷修复、风险接受、经验回灌、下轮生成
 ```
 
@@ -57,4 +57,7 @@
 | FINAL-WITH-GAPS 被未触=0 误杀 | SUA 三态分别校验 |
 | 无 PRD 回退契约基底 | source-reconciliation 四活源降级 |
 | 格式缺陷阻止报告 | 保底 INTERIM/直接回复最小报告 |
+| DOC/域批/控件清单冒充拟人旅程 | UAT 身份闸+真实连续旅程+AUDIT 独立 |
+| 技术信号直接成为 UAT 缺陷 | TECH-OBS 与 persona 入口结果分离 |
+| 技能研发治理进入常驻生成 | 仅 maintainer-guide，不参与任务生成 |
 | 操作者未签署导致永不收口 | 执行关闭与风险接受分层 |

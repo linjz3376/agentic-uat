@@ -70,7 +70,7 @@ awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$DOC" \
 ## 4. 运行时外部规范指针清零（冻结自包含）
 
 ```bash
-grep -nE '见契约|以.*V[0-9]+\.[0-9]+|主契约|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准' "$DOC"
+grep -nE '见契约|以.*V[0-9]+\.[0-9]+|见主契约|以主契约为准|主契约原样要求|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准' "$DOC"
 ```
 
 判据：零命中（静态出处、密钥提供方、缺陷台账和项目更严安全红线豁免）。另核任务书头部有静态出处与快照哈希，且状态机/授权/报告/产物/契约规范已内联；仅写指针不算内联。
@@ -209,7 +209,7 @@ $seg | ForEach-Object { $f2 = ($_ -split '\|')[1]
 **§4 指针清零等价**（判据：零命中，豁免同 §4）：
 
 ```powershell
-$lines | Select-String -Pattern '见契约|以.*V[0-9]+\.[0-9]+|主契约|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准'
+$lines | Select-String -Pattern '见契约|以.*V[0-9]+\.[0-9]+|见主契约|以主契约为准|主契约原样要求|契约 §|以契约为准|全表见|执行期以.*当前版本|执行侧.*当前版本|当前版本为准'
 ```
 
 **§5 派生依赖等价**（判据同 §5：输出为候选，按禁止/溯源/真实依赖语境判定，不再机械零命中；.NET 正则窗口按字符计数，无需字节放宽）：
@@ -259,40 +259,27 @@ Get-Content routes.txt -Encoding UTF8 | ForEach-Object {
 
 **§8/§12 无需 PS 版**：§8 是 git 命令，`git` 本身跨 shell 行为一致（直接在 PowerShell 里跑）；§12 是人工逐处核对。
 
-## 14. 入口标签覆盖
+## 14. 产品 AC 入口标签（仅 UI/MACHINE）
 
-主表每行操作列（第 2 字段为 ID；有「向」列时操作在第 4 字段，否则第 3 字段）必须以 `[UI]`、`[MACHINE]` 或 `[DOC]` 开头，且全表逐行互斥：
+产品 AC 主表每行操作列必须以 `[UI]` 或 `[MACHINE]` 开头且互斥；DOC/AUDIT 不得出现在 AC 主表。UI 包含人类 GUI/TUI/日常 CLI/API；MACHINE 必须另附真实机器/外部系统契约与自身凭据证明。
 
 ```bash
 awk '/^#+ *3\. /{f=1;next} f && /^## (3\.5|4)([. ]|$)/{f=0} f' "$DOC" \
 | awk -F'|' '{ id=$2; if (match(id,/AC-[A-Z0-9]+-[0-9]{3}[A-Z]?/)) {
     op=$4; if ($3 !~ /^ *(正|负) *$/) op=$3; s=op; gsub(/^ +| +$/,"",s);
-    n=gsub(/\[UI\]/,"&",s)+gsub(/\[MACHINE\]/,"&",s)+gsub(/\[DOC\]/,"&",s);
-    if (n!=1 || s !~ /^\[(UI|MACHINE|DOC)\]/) printf "TAG? %s (tags=%d)\n", substr(id,RSTART,RLENGTH), n } }'
+    n=gsub(/\[UI\]/,"&",s)+gsub(/\[MACHINE\]/,"&",s);
+    if (n!=1 || s !~ /^\[(UI|MACHINE)\]/) printf "TAG? %s (tags=%d)\n", substr(id,RSTART,RLENGTH), n } }'
 ```
 
-判据：输出为空（每个 AC 行恰好一个入口标签，且位于操作列首）。出现 `tags=0`=漏标，`tags=2`=双标。
-补充人工核（每域抽 2 点）：`[MACHINE]` 是否满足「无 UI 入口」或「机器 persona」；是否写了契约断言；有没有把有 UI 的能力写成 `[MACHINE]` 绕过页面判定。
+判据：产品 AC 标签无漏/双标；DOC/AUDIT 只在独立审计区。人工抽查 MACHINE 是否有真实机器调用方，「无 UI/管理员/习惯 CLI」一律拒绝。
 
-PowerShell 等价：
-
-```powershell
-$seg | ForEach-Object {
-  $c = $_ -split '\|'; $id = $c[1]
-  if ($id -cmatch 'AC-[A-Z0-9]+-\d{3}[A-Z]?(?![A-Z0-9])') {
-    $ac = $Matches[0]
-    $op = if ($c[2] -match '^\s*(正|负)\s*$') { $c[3] } else { $c[2] }
-    $n = ([regex]::Matches($op, '\[UI\]')).Count + ([regex]::Matches($op, '\[MACHINE\]')).Count + ([regex]::Matches($op, '\[DOC\]')).Count
-    if ($n -ne 1 -or $op -notmatch '^\s*\[(UI|MACHINE|DOC)\]') { "TAG? $ac (tags=$n)" }
-  }
-}
-```
+PowerShell 等价：使用 §13 的完整 AC-ID 边界，操作列只匹配 `^\s*\[(UI|MACHINE)\]`；另用全文档候选检查防止非法子字母截断。
 
 ## 15. BLOCKED 六类归因与 ⏭️ 通道结论
 
 1. 每条 BLOCKED 必须且仅有一个主归因：UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED/DEFERRED/BUDGET_EXHAUSTED/OMITTED，并有对应证明。
 2. UNREACHABLE 核有限努力证明，不要求换人/换时间；OBSERVABILITY_BLOCKED 核原始错误或结构化尝试记录；BUDGET_EXHAUSTED 核预算快照；DEFERRED 核接受人。
-3. 涉及入口存在性/可达性的 ⏭️，以及涉及入口的 UNREACHABLE/UNAUTHORIZED，必须含「不存在/不可用+原因/未授权」结论；纯 DOC 不适用项只核存在性证据，预算/观测/其他归因不得伪造通道结论。
+3. 涉及入口存在性/可达性的 ⏭️，以及涉及入口的 UNREACHABLE/UNAUTHORIZED，必须含「不存在/不可用+原因/未授权」结论；纯 AUDIT 不适用项只核存在性证据，预算/观测/其他归因不得伪造通道结论。
 4. 造数返回码不得作产品判定依据。
 
 可选辅助：先收集 BLOCKED 行，再逐行核六类归因及证明；不能只靠关键词数量判合格。正反样例见 §20 与 §23。
@@ -309,7 +296,7 @@ $seg | ForEach-Object {
 **可选 grep 辅助（不是执行前提）：**
 
 ```bash
-# 场景表 S-ID（示例：S1/G1/G-DOM-APV）；先截 §0 区间，避免匹配正文其他表
+# 场景表 S-ID（示例：S1/G1/G-APV-IMPORT）；先截 §0 区间，避免匹配正文其他表
 awk '/^## 0\./{f=1} /^## 1\./{f=0} f' "$DOC" | grep -nE '^\|[[:space:]]*(S|G)[0-9A-Z-]+[[:space:]]*\|'
 # 场景-AC 矩阵内出现的 AC（只截 §0，避免正文其他表误命中）
 awk '/^## 0\./{f=1} /^## 1\./{f=0} f' "$DOC" | grep -nE '^\|[[:space:]]*(S|G)[0-9A-Z-]+[[:space:]]*\|.*AC-[A-Z0-9]+-[0-9]{3}[A-Z]?'
@@ -328,34 +315,16 @@ $sec0 | Select-String -Pattern '^\|\s*(S|G)[0-9A-Z-]+\s*\|.*AC-[A-Z0-9]+-\d{3}[A
 
 判据：模型逐条回答“有/无+证据”；任一缺项=场景模型不合格，报告只能 INTERIM。
 
-## 17. UI/MACHINE/DOC 入口主证
+## 17. 人类 UI 与真机器 MACHINE 主证
 
-**模型自检提示：**
+1. 人类 GUI PASS 要有判定时截图/DOM；TUI/CLI 要有终端读屏/输出；人类 API 要有调用方可见响应+最终业务结果。
+2. GUI 有状态写点有实际控件、适用对话框确认/取消双路径和保存后回显；TUI/CLI 有终端输入/输出，人类 API 有调用方请求响应+最终业务结果；纯只读点不强制 confirm/保存回显。只验确认不得判双路径通过。
+3. MACHINE PASS 必须有真实机器调用方的契约响应与内容断言；有状态变更才另核幂等和预期副作用，纯只读不得造副作用。
+4. DOC/AUDIT 不判产品功能、不计需求验证分子、不参与 UAT 三态；纯 DOC 只能 coverage-audit。
+5. 内部信号先记 TECH-OBS；无 persona 入口侧承诺失败关联，不得形成 UAT ❌。
+6. 已见结果缺主证最高 PARTIAL；完全无法观察为 OBSERVABILITY_BLOCKED；事后补证不升级。
 
-1. UI PASS 必须有判定时截图或 `[DOM]`；已见结果但缺主证最高 PARTIAL，完全无法观察则 OBSERVABILITY_BLOCKED。
-2. 每个 UI 写点有实际控件标签、适用对话框和保存后回显；只写“填表保存”=不可执行。
-3. MACHINE PASS 必须有符合契约的响应与内容断言；有状态变更语义时另核幂等和预期可观察副作用，纯只读不得为取证造副作用。无 UI 不是失败理由，HTTP 200 不单独构成通过。
-4. DOC PASS 必须有本轮对账表，不得冒充产品功能验证。
-5. 报告入口证据表分别列 UI 主证、MACHINE 契约和 DOC 对账；UI PASS 主证覆盖不足 100% 判 INTERIM。
-6. 事后补证不得升级原判定。
-
-**可选 grep 辅助：**
-
-```bash
-# UI 行（需先按 §1 scan 口径截取 §3；此处仅示意）
-grep -nE '\[UI\]' "$DOC"
-# 报告中的 UI 证据覆盖表
-grep -nE 'UI.*证据.*覆盖|UI PASS.*证据|判定时截图|事后补证' "$REPORT"
-```
-
-PowerShell 等价：
-
-```powershell
-$seg | Select-String -Pattern '\[UI\]'
-Select-String -Path $REPORT -Pattern 'UI.*证据.*覆盖|判定时截图|事后补证'
-```
-
-判据：✅ 必须满足对应入口主证；UI PASS 无 UI 证据不得通过，MACHINE 无 UI 不扣分，DOC 不替代产品验证。主证缺口影响报告状态，但不得阻止保底 INTERIM。
+报告入口证据表分别列人类界面与机器契约；UI PASS=0 写 N/A+理由，大于 0 且主证不足 100% 判 INTERIM；任一入口 PARTIAL 均 INTERIM。
 
 ## 18. G0/SBTM 记录
 
@@ -414,17 +383,21 @@ Select-String -Path $DOC,$REPORT -Pattern '场景完成|场景级结论|按.*场
 | `positive-coverage-ledger.md` | 按表头读设计期第 4 列，尾格不误当桶位 |
 | `positive-execution-book.md` + `positive-report-with-gaps.md` | §21–§23 通过；合法 FINAL-WITH-GAPS 不被误杀 |
 | `negative-report-waiting.md` | 共同前置 WAITING=1，必须拒绝报告状态和 CLOSED |
+| `negative-focus-book.md` | §24 拦截 DOC 冒充 AC、人类 CLI 误 MACHINE、域批吞并、技术信号直判缺陷、单会话长任务 schema |
+| `positive-focus-book.md` + `positive-focus-report.md` | 合法人类 CLI/API、真机器只读、独立 AUDIT、连续旅程、TECH-OBS 不误伤 |
+| `positive-report-final-fail.md` | 全项有证据、UI PASS=0、存在 ❌，仍可 FINAL |
+| `negative-extended-missing-field.md` | EXTENDED 仅缺 reconciliationSource 也必须 FAIL |
 | `negative-execution-book.md` | §21–§23 命中动态指针、沉默授权、全绿停止、全局化局部故障和无保底报告 |
 
 改任何闸后先跑正样例再跑负样例，并实际执行 §23 全部桌面推演。样例为通用虚构内容，零实例残留；校验器先证明负例会被拦截，再采信正例输出。
 
 ## 21. 报告三态与保底闸（G5）
 
-先核共同前置硬闸：READY=0、WAITING=0、DONE+BLOCKED=AC 总数；不满足则不得进入任何三态，返回调度或按全局支路先转 BLOCKED。随后读报告头 `报告状态` 按分支校验，禁止只看文件名或统一要求未触=0：
+先核 UAT 身份：至少一条真实 persona 产品旅程有定性结论，DOC/AUDIT 不参与。所有模式核每个计划产品 AC 为 DONE/合法 BLOCKED；SINGLE 另核最小断点无待续/独立可执行项且不创建队列，EXTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数；不满足则不得进入任何三态，返回调度或按全局支路先转 BLOCKED。随后读报告头 `报告状态` 按分支校验，禁止只看文件名或统一要求未触=0：
 
 | 状态 | 必须满足 |
 |---|---|
-| FINAL | BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0；UI PASS=0 时 N/A 或主证 100%；计划产物完整；S+G=0 且 O=P |
+| FINAL | BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0；UI PASS=0 时 N/A+理由，UI PASS>0 时对应主证 100%；计划产物完整；S+G=0 且 O=P |
 | FINAL-WITH-GAPS | 不满足 INTERIM且存在 BLOCKED/未裁定 ⏸️/S/G；BLOCKED 有合法外部归因或 DEFERRED 接受记录；⏸️ 要件齐；S/G 有稳定 ID+证据+合法映射；无缺口不得本态 |
 | INTERIM | 任一入口 PARTIAL，或 OMITTED/BUDGET_EXHAUSTED，或主证/计划产物缺口，或 ⏸️ 要件缺失，或 P=O+S+G 不成立，或 S/G 缺稳定 ID/证据/合法映射；允许 CLOSED |
 
@@ -435,14 +408,19 @@ grep -nE '报告状态|BLOCKED|OMITTED|BUDGET_EXHAUSTED|保底报告|CLOSED' "$R
 
 判据：状态与条件一致；FINAL-WITH-GAPS 不得被「未触=0」误杀；INTERIM 不需伪装终期。模拟产物命名/断链失败时仍必须能签最小报告；「未过不得出报告」为负例。
 
-## 22. 执行契约冻结快照（G2）
+## 22. 所选执行模式冻结（G2）
+
+先读任务书头执行模式：
+
+- SINGLE_SESSION：只允许场景/persona/当前 AC/步骤/下一动作/预算/证据/缺陷/最小断点。相关词命中是候选：实际字段赋值、非空 schema、接管步骤或租约配置=FAIL；「禁止/不得/无/不包含」等否定说明安全。不得把禁令本身误判为携带 schema。
+- EXTENDED_UNATTENDED：必须完整内联状态机、四队列、writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、预算、新鲜观察、trigger 迁移、收判包和报告字段。断点逐字段核：AC-ID、queue、scope、currentStep、intent、acceptanceSignal、dependencies、blockCause、releaseCondition、resumeAfter、attemptCount、retryLevel、lastObservation、budgetUsed、sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource、nextAction、evidenceRefs、unregisteredJudgements；缺任一即 FAIL。
 
 ```bash
-grep -nE 'Execution-Contract|writerId|leaseEpoch|leaseExpiresAt|READY|WAITING|BLOCKED|DONE|预算|新鲜观察|收判|报告' "$DOC"
-grep -nE '执行期以.*当前版本|当前版本为准|五字段骨架|三件套' "$DOC"
+grep -nE 'SINGLE_SESSION|EXTENDED_UNATTENDED|最小断点|leaseEpoch|fencingToken|triggerId' "$DOC"
+grep -nE '执行期以.*当前版本|当前版本为准' "$DOC"
 ```
 
-判据：契约含 SUA schema 的完整内联骨架，运行时值留占位；写者租约、四队列、预算、恢复和报告字段缺一不可。第二命令零命中；静态出处可保留但不构成运行依赖。
+判据：只含所选模式；第二命令零命中。扩展内容来自生成侧模板并完整内联，最终任务书不得保留外部模板指针。轻量任务没有长窗时不得创建常驻巡逻。
 
 ## 23. 自主续跑、授权与局部阻塞
 
@@ -451,5 +429,19 @@ grep -nE '命令即签|沉默=GO|沉默即 GO|默认授予全集|默认等空闲
 grep -nE 'ACTION|AC|SCENARIO|DOMAIN|GLOBAL|READY|WAITING|BUDGET_EXHAUSTED|OBSERVABILITY_BLOCKED|迟发依赖|保底报告' "$DOC"
 ```
 
-判据：第一组是**审查候选，不是机械零命中**；命中若处于「禁止/不得/负例」等否定语境则安全，肯定授权/停止语境才违规。第二组语义逐项存在且形成闭环。桌面推演：①单角色凭据失效后独立 DOC 继续 ②无法截图时 READY 继续 ③预算耗尽先把 READY/WAITING 逐项转 BUDGET_EXHAUSTED，双空后 INTERIM+CLOSED ④写者失联接管含 trigger 迁移或保底 ⑤风险未签署不撤销报告 ⑥自主全 ✅ 无缺口可 FINAL ⑦任一 MACHINE PARTIAL 必 INTERIM ⑧控件 S/G>0 不得 FINAL且必须列稳定 ID ⑨外部不可达 UI 的计划控件进 G 且可 WITH-GAPS，不因 O<P-S 自动 INTERIM ⑩完全无缺口不得 WITH-GAPS。任一出现无状态/无出口等待=闸失败。
+判据：第一组是**审查候选，不是机械零命中**；命中若处于「禁止/不得/负例」等否定语境则安全，肯定授权/停止语境才违规。第二组语义逐项存在且形成闭环。桌面推演：①单角色凭据失效后独立 AUDIT 继续 ②无法截图时下一独立项继续（EXTENDED 为 READY） ③预算耗尽先把 READY/WAITING 逐项转 BUDGET_EXHAUSTED，双空后 INTERIM+CLOSED ④写者失联接管含 trigger 迁移或保底 ⑤风险未签署不撤销报告 ⑥自主全 ✅ 无缺口可 FINAL ⑦任一 MACHINE PARTIAL 必 INTERIM ⑧控件 S/G>0 不得 FINAL且必须列稳定 ID ⑨外部不可达 UI 的计划控件进 G 且可 WITH-GAPS，不因 O<P-S 自动 INTERIM ⑩完全无缺口不得 WITH-GAPS。任一出现无状态/无出口等待=闸失败。
 
+
+## 24. 拟人身份、连续旅程与用户语言
+
+逐项核验：
+
+1. UAT 至少一条真实 persona 产品旅程，含动机/起点/连续步骤/交接/最终结果；DOC-only 只能 coverage-audit。
+2. 产品 AC 仅 UI/MACHINE；PRODUCT/AUDIT/MIXED 先分层，AUDIT 独立记已核/未核且不落纯未覆盖；DOC 退出 AC/场景/需求分子/分母/UAT 三态；MACHINE 有真机器契约和自身凭据。
+3. AC 挂靠与场景完成分开；禁止 G-DOM/管理员场景默认吞并全部 AC；矩阵闭合不代替旅程完成。
+4. 缺陷摘要含 persona+业务目标+真实入口+实际/预期结果；TECH-OBS 与 UAT 缺陷分离。
+5. 报告首节为关键旅程定性结论，不新增旅程通过率 KPI；覆盖/证据/未触只作审计。
+6. 单会话无长任务接管 schema；扩展任务只冻结所选 EXTENDED_UNATTENDED 规程。
+7. ACG 常驻正文不包含技能研发治理；其归 maintainer-guide，不参与任务生成。
+
+负例必须分别覆盖：DOC 作为 AC、全 DOC FINAL、人类 CLI 标 MACHINE、G-DOM 关联全部 AC、控制台异常直接 UAT ❌、纯技术缺陷标题、SINGLE_SESSION 携带 fencingToken。任一漏拦=自检失效。

@@ -42,5 +42,11 @@
 - 侦察路由未收口：侦察动作本身不等于覆盖——扫出的路由清单是**覆盖义务清单**，逐条落点或 ⏭️/N/A+理由。报表/热图/队列监控/扩展配置类长尾管理页最高频被漏（它们没进用户主线场景，但每条都是真实功能页 + 常带 admin 权限面）。
 - 计数机跑少口径就开跑：裸 `grep '^| AC-'` 不分区间会把 §3.x 表头行与判据表引用行一并计入（实证：5 行判据表引用混入→声明 191 被误数成 195，反向把自家零重号书写成重号书）——精确口径=按 §3 标题区间扫描并剔除表头行（命令见 references/self-check-gates.md），顺手用 `uniq -d` 出重号清单。
 - 场景表当目录：只写 `场景/persona/目标/关联域` 四列，没有基本/备选/异常流、交接、AC 映射——场景就没有生成力，执行者只能按 AC 表逐条打勾；证据：某轮 50 个 UI 点中 29 个无截图、多个 `[UI]` 写点用 API 直调。修法=场景八要素+场景-AC 矩阵+handoff 矩阵+场景优先执行顺序（self-check-gates §16/§19）。
-- UI 点 API 化：`[UI]` 点用 API 200 判 PASS，页面 confirm/alert 未处理、保存后详情/列表未回显；证据：某轮 UI 更正首次被 confirm 默认 dismiss、根本没发请求，申请人保存 200 但详情仍空。修法=UI 写点必须真实点控件+处理 dialog+记录回显；UI PASS 必须有判定时截图/DOM，API-only 最高 PARTIAL（self-check-gates §17）。
+- UI 点 API 化：`[UI]` 点用 API 200 判 PASS，页面 confirm/alert 未处理、保存后详情/列表未回显；证据：某轮 UI 更正首次被 confirm 默认 dismiss、根本没发请求，申请人保存 200 但详情仍空。修法=GUI 写点真实点控件+处理 dialog+回显并留截图/DOM；TUI/CLI 留终端输出，人类 API 留调用方响应+最终结果。只有用内部/替代 API 绕过既定真实入口才判 PARTIAL/违规，合法人类 API 主证可 PASS。
+- DOC 审计冒充 UAT：纯对账不得使用 AC-ID、挂场景、计需求验证分子或出 UAT FINAL；纯 DOC 只能 coverage-audit。
+- 域批吞并全部 AC：G-DOM/管理员场景关联全部 AC 只证明矩阵闭合；每个关键业务目标必须有连续基本流、交接和最终用户结果。
+- 人类技术入口误标 MACHINE：人类管理员/运维/开发者日常 CLI/API 仍属 UI；MACHINE 仅产品明确交付的机器/外部系统调用方。
+- 技术信号直接判 UAT 缺陷：控制台/日志/网络/内部数据先记 TECH-OBS；无 persona 入口承诺失败关联不得形成 UAT ❌。
+- 单会话携带长任务 schema：SINGLE_SESSION 不得出现租约/CAS/fencing/多写者接管；只有 EXTENDED_UNATTENDED 才冻结完整扩展契约。
+- 缺陷只有技术标题：每条缺陷摘要必须含 persona+业务目标+真实入口+实际/预期结果，技术根因另列。
 

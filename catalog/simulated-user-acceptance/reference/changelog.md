@@ -6,6 +6,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 3.7.0 拟人验收内核收敛批
+
+重建 UAT 身份与入口边界：UI 覆盖人类 GUI/TUI/日常 CLI/API，MACHINE 仅真实机器/外部系统调用方，DOC 退出产品 AC/场景/需求验证分子/UAT 三态。新增真实 persona 卡、连续业务旅程、起点/交接/最终结果、场景完成与 AC 挂靠分离；禁止域批吞并全部 AC。缺陷摘要强制 persona+目标+入口+实际/预期，内部巡检归 TECH-OBS。执行模式分 SINGLE_SESSION 与 EXTENDED_UNATTENDED，普通任务不携带租约/CAS/多写者接管；长任务完整状态机仍由 artifact §6 持有。报告首节给关键旅程定性结论，不新增旅程通过率 KPI。同步 gui/method/defect/artifact references；description 同步人类 GUI/TUI/CLI/API 与真机器边界，examples/cues 保持基线；路由 train 36/36、held-out 16/16。
+
 ## 3.6.0 自主执行控制面重构批
 
 将执行控制统一为 PREFLIGHT/RUNNING/WAITING/REPORTING/CLOSED 与 GLOBAL_NO_GO/BUDGET_EXHAUSTED 支路：CLOSED 只代表报告已签发，不再绑定全 PASS、缺陷修复或风险签署。新增五级阻塞、READY/WAITING/BLOCKED/DONE 调度、六类 BLOCKED 归因、有限 UNREACHABLE 证明、写者租约/fencing token、副作用断点、四件套和保底报告；WAITING 未收判不得 CLOSED。授权改为显式清单，禁止命令即签/沉默授权/默认重启，secrets 仅受控注入。入口主证分 UI/MACHINE/DOC；覆盖按关键/标准/探索风险档，控件以稳定 control_id 和 I/P/O/S 对账。同步正文及 artifact/method/boundary/tool/runbook/gui/defect references；替代旧全绿停止、无限穷尽、格式阻报和签署才收口口径。frontmatter description 改为不枚举归因的通用表述，routing examples/cues 对齐 Git 基线；路由回归 train 36/36、held-out 16/16。失效条件=载体原生提供同等可验证的状态机、授权、调度和恢复能力时进退役评审。

@@ -8,9 +8,22 @@
         "references/exception-baseline.md",
         "references/executable-standards.md",
         "references/gate-samples/negative-book.md",
+        "references/gate-samples/negative-execution-book.md",
+        "references/gate-samples/negative-extended-missing-field.md",
+        "references/gate-samples/negative-focus-book.md",
+        "references/gate-samples/negative-id-reference.md",
+        "references/gate-samples/negative-report-waiting.md",
         "references/gate-samples/negative-report.md",
         "references/gate-samples/positive-book.md",
+        "references/gate-samples/positive-coverage-ledger.md",
+        "references/gate-samples/positive-execution-book.md",
+        "references/gate-samples/positive-focus-book.md",
+        "references/gate-samples/positive-focus-report.md",
+        "references/gate-samples/positive-id-subletters.md",
+        "references/gate-samples/positive-report-final-fail.md",
+        "references/gate-samples/positive-report-with-gaps.md",
         "references/gate-samples/positive-report.md",
+        "references/maintainer-guide.md",
         "references/pitfalls.md",
         "references/pollution-taxonomy.md",
         "references/provenance-gate.md",
@@ -19,12 +32,13 @@
         "references/source-reconciliation.md",
         "references/test-depth-dimensions.md",
         "SKILL.md",
+        "templates/extended-unattended-appendix.md",
         "templates/project-instruction.md",
         "templates/project-skeleton.md",
         "templates/task-instruction.md"
       ],
       "name": "acceptance-contract-governance",
-      "version": "1.6.0"
+      "version": "1.7.0"
     },
     {
       "files": [
@@ -39,7 +53,7 @@
         "SKILL.md"
       ],
       "name": "simulated-user-acceptance",
-      "version": "3.6.0"
+      "version": "3.7.0"
     }
   ]
 }

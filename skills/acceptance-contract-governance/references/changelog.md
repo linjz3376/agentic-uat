@@ -7,6 +7,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.7.0 拟人旅程与执行模式分层批
+
+产品 AC 仅 UI/MACHINE：UI 包含人类 GUI/TUI/日常 CLI/API，MACHINE 仅真实机器调用方；DOC 改 AUDIT-ID 独立审计，退出 AC/场景/需求分子/UAT 三态。任务书强制真实 persona 连续旅程，禁止 G-DOM/管理员场景吞并全部 AC，场景完成与矩阵闭合分开。执行模式分 SINGLE_SESSION/EXTENDED_UNATTENDED，新增 extended-unattended-appendix 生成块，普通任务不再冻结租约/CAS/接管。报告首节为关键旅程定性结论；缺陷摘要强制用户语言，技术巡检归 TECH-OBS。技能研发治理移 maintainer-guide，不参与任务生成。同步正文、双模板、executable/provenance/coverage/depth/pitfalls/interface/self-check 和聚焦负样例。
+
 ## 1.6.0 冻结执行合同与风险有界批
 
 生成侧统一为冻结自包含任务书：运行时规范外部依赖=0，禁止当前版本指针和命令即签/沉默授权；授权清单支持具名优雅重启与 secrets 受控注入，迟发依赖局部处置。完成准则改由 SUA CLOSED 状态定义，FINAL/FINAL-WITH-GAPS/INTERIM 分闸，产物失败仍出保底报告。无 PRD 永不回退契约基底，覆盖公式区分产品质量指标与 UI 证据完整性；引入关键/标准/探索风险档，删除固定点数和指数级组合硬要求。同步正文、双执行模板、project-skeleton、skill-interface、source/coverage/depth/executable/pitfalls、self-check-gates 与执行控制正反样例。替代旧全绿停止、默认授权、动态版本追随和契约基底口径；失效条件=生成工具能以可验证规范包自动完成同等冻结与冲突检测时进退役评审。
