@@ -1,4 +1,4 @@
-# 扩展接管缺字段负样例（虚构）
+# 并行接管缺字段负样例（虚构）
 
 - 执行模式：PARALLEL_UNATTENDED。
 - 已有 writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、四队列、预算、triggerId、收判包和恢复步骤。

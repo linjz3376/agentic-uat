@@ -29,3 +29,5 @@
 任何条款修订按影响面核查：正文、Verification Checklist、受影响 references、模板、self-check-gates、样例、README、catalog 镜像和路由回归。
 
 同步不仅是字段存在：必须做跨文件语义冲突扫描、正反样例、当前版本与 changelog 对账。涉及 frontmatter description/routing 时跑 train 与 held-out 回归；不得为通过检查而改写预期样例。
+
+Markdown 展示修订须全技能扫描：真实 GFM 表格必须有分隔行且各行列数一致，代码围栏必须闭合；非表格字段 schema 用行内代码，禁止单行竖线伪表格。空表头模板与 Shell/PowerShell 管道是合法反例，不得误改；除字段存在外，还须对字段去重计数并与规范总数对账。

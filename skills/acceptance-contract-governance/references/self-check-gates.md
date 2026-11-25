@@ -386,7 +386,7 @@ Select-String -Path $DOC,$REPORT -Pattern '场景完成|场景级结论|按.*场
 | `negative-focus-book.md` | §24 拦截 DOC 冒充 AC、人类 CLI 误 MACHINE、域批吞并、技术信号直判缺陷、SINGLE_WRITER 携带并行接管 schema |
 | `positive-focus-book.md` + `positive-focus-report.md` | 合法人类 CLI/API、真机器只读、独立 AUDIT、连续旅程、TECH-OBS 不误伤 |
 | `positive-report-final-fail.md` | 全项有证据、UI PASS=0、存在 ❌，仍可 FINAL |
-| `negative-extended-missing-field.md` | PARALLEL_UNATTENDED 仅缺 reconciliationSource 也必须 FAIL |
+| `negative-parallel-missing-field.md` | PARALLEL_UNATTENDED 仅缺 reconciliationSource 也必须 FAIL |
 | `negative-execution-book.md` | §21–§23 命中动态指针、沉默授权、全绿停止、全局化局部故障和无保底报告 |
 
 改任何闸后先跑正样例再跑负样例，并实际执行 §23 全部桌面推演。样例为通用虚构内容，零实例残留；校验器先证明负例会被拦截，再采信正例输出。
@@ -413,7 +413,7 @@ grep -nE '报告状态|BLOCKED|OMITTED|BUDGET_EXHAUSTED|保底报告|CLOSED' "$R
 先读任务书头执行模式：
 
 - SINGLE_WRITER：必须含共享状态机、逻辑 READY/WAITING/BLOCKED/DONE、长窗解除条件/resumeAfter/一次性收判/超时、预算、副作用、证据和最小断点；长窗原地续跑，不另出书/重复授权。并行相关词命中是候选：实际字段赋值、非空 schema、接管步骤或租约配置=FAIL；「禁止/不得/无/不包含」等否定说明安全。不得把禁令本身误判为携带 schema。
-- PARALLEL_UNATTENDED：必须完整内联状态机、四队列、writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、预算、新鲜观察、trigger 迁移、收判包和报告字段。断点逐字段核：AC-ID、queue、scope、currentStep、intent、acceptanceSignal、dependencies、blockCause、releaseCondition、resumeAfter、attemptCount、retryLevel、lastObservation、budgetUsed、sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource、nextAction、evidenceRefs、unregisteredJudgements；缺任一即 FAIL。
+- PARALLEL_UNATTENDED：必须完整内联状态机、四队列、writerId、leaseEpoch=fencingToken、acquiredAt、leaseExpiresAt、heartbeatAt、预算、新鲜观察、trigger 迁移、收判包和报告字段。断点共 21 个字段，逐字段核：AC-ID、queue、scope、currentStep、intent、acceptanceSignal、dependencies、blockCause、releaseCondition、resumeAfter、attemptCount、retryLevel、lastObservation、budgetUsed、sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource、nextAction、evidenceRefs、unregisteredJudgements；缺任一、重复或总数不符即 FAIL。
 
 ```bash
 grep -nE 'SINGLE_WRITER|PARALLEL_UNATTENDED|最小断点|leaseEpoch|fencingToken|triggerId' "$DOC"

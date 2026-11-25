@@ -7,6 +7,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.8.3 Markdown 同型缺陷深度复盘批
+
+全技能复核近期表格与模式改名：exception-baseline 的业务特有槽由单行竖线改为完整六列 GFM 表格；ac-id-rules 的字段序列改为行内 schema，test-depth 的选择关系改用中文，避免裸竖线歧义。`extended-unattended-appendix.md` 更名为 `parallel-unattended-appendix.md`，`negative-extended-missing-field.md` 更名为 `negative-parallel-missing-field.md`，现行引用与 catalog 索引同步，changelog 历史名称保留。断点字段明确为 21 个，self-check 新增去重计数；维护规程补表格分隔行、列数、围栏、伪表格和合法反例检查。仅展示与命名纠偏，不改变执行语义。
+
 ## 1.8.2 断点字段 GFM 表格修复批
 
 extended-unattended-appendix 的「每个未完成 AC 的断点」由 text 代码块改为 GFM 表格，分五组列出全部必填字段，修复表格不渲染/竖线异常。同步 SUA artifact §6.2 保持同构；不改变 SINGLE_WRITER 与 PARALLEL_UNATTENDED 语义。

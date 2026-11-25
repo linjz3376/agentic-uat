@@ -3,7 +3,7 @@ name: simulated-user-acceptance
 description: "Use when executing simulated user acceptance (UAT), persona-based end-to-end journeys, or organizing acceptance evidence and reports. Enforces entry fidelity: human GUI/TUI/CLI/API stays UI, while MACHINE is reserved for actual machine/external-system callers. Internal interfaces remain auxiliary. Execution runs on a bounded interaction control flow (fresh-perception contract, authoritative-layer verification, progress-proof retry ladder, intent binding, hard budget). Covers browser/Playwright/manual UI, scenario-first execution with risk priority, UI-primary evidence, L1/L2/L3 coverage, boundary derivation, blocked-attribution auditing with retest pull-up and bounded recovery, three-state reporting, artifact-tree gates, and machine-computed coverage metrics."
 license: MIT
 metadata:
-  version: "3.8.2"
+  version: "3.8.3"
   author: "linjz"
   platforms: "linux, macos, windows"
   category: [qa, uat, execution]

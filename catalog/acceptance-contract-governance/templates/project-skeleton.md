@@ -20,7 +20,7 @@
 - bugQueue.json（缺陷队列）/ defects-tracker.md（人工镜像）/ execution-ledger.json（执行总账）
 - 台账=缺陷状态单一事实源；契约/任务书只链接编号，不复制状态
 - 文件名为建议默认值：可按项目惯例调整——下游定位一律动态扫描（见 SKILL 素材白名单「台账镜像动态定位」），禁止把默认名当跨项目契约
-- 执行契约=<项目>/tests/reports/<轮次树>/obs/contract.md——仅 PARALLEL_UNATTENDED 创建，由生成侧内联 extended-unattended-appendix 的状态机/四队列/租约/收判/恢复完整快照；SINGLE_WRITER 在 execution-log 含共享状态机/逻辑四态/长窗收判/最小断点，不创建 obs/contract；静态出处不作运行依赖
+- 执行契约=<项目>/tests/reports/<轮次树>/obs/contract.md——仅 PARALLEL_UNATTENDED 创建，由生成侧内联 parallel-unattended-appendix 的状态机/四队列/租约/收判/恢复完整快照；SINGLE_WRITER 在 execution-log 含共享状态机/逻辑四态/长窗收判/最小断点，不创建 obs/contract；静态出处不作运行依赖
 
 ## 5. 层间指针纪律
 - 契约 → 执行层：只留「路径+一行职责」指针，不复制内容
