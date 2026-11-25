@@ -205,13 +205,13 @@ WAITING 解除未判→READY，收判完成→DONE，失败/超时→BLOCKED；�
 
 ### 6.2 每个未完成 AC 的断点字段
 
-```text
-AC-ID | queue | scope | currentStep | intent | acceptanceSignal
-dependencies | blockCause | releaseCondition | resumeAfter
-attemptCount | retryLevel | lastObservation | budgetUsed
-sideEffectIds | idempotencyKeys | dataBaseline | reconciliationSource
-nextAction | evidenceRefs | unregisteredJudgements
-```
+| 分组 | 必填字段 |
+|---|---|
+| 标识与状态 | AC-ID、queue、scope、currentStep、intent、acceptanceSignal |
+| 依赖与解除 | dependencies、blockCause、releaseCondition、resumeAfter |
+| 重试与观察 | attemptCount、retryLevel、lastObservation、budgetUsed |
+| 副作用与对账 | sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource |
+| 后续与登记 | nextAction、evidenceRefs、unregisteredJudgements |
 
 恢复顺序：读租约和最近完整记录→以 CAS 获取写者权和新 fencingToken→枚举全部 pending triggerId 并迁移/重建一次性收判→向权威源核对 `sideEffectIds` 与数据基线→再决定续作/跳过/重放→更新四队列。无法证明副作用是否发生时，禁止盲目重放不可逆动作；无法迁移触发器时不得假称接管成功，受影响 WAITING 转 BLOCKED，恢复完整性缺口按 INTERIM 处理。
 

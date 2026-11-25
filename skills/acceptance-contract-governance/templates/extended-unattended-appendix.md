@@ -32,13 +32,13 @@ RUNNING/WAITING ──收判完成且 READY=0、WAITING=0──→ REPORTING →
 
 ### 每个未完成 AC 的断点
 
-```text
-AC-ID | queue | scope | currentStep | intent | acceptanceSignal
-dependencies | blockCause | releaseCondition | resumeAfter
-attemptCount | retryLevel | lastObservation | budgetUsed
-sideEffectIds | idempotencyKeys | dataBaseline | reconciliationSource
-nextAction | evidenceRefs | unregisteredJudgements
-```
+| 分组 | 必填字段 |
+|---|---|
+| 标识与状态 | AC-ID、queue、scope、currentStep、intent、acceptanceSignal |
+| 依赖与解除 | dependencies、blockCause、releaseCondition、resumeAfter |
+| 重试与观察 | attemptCount、retryLevel、lastObservation、budgetUsed |
+| 副作用与对账 | sideEffectIds、idempotencyKeys、dataBaseline、reconciliationSource |
+| 后续与登记 | nextAction、evidenceRefs、unregisteredJudgements |
 
 ### 接管与恢复
 

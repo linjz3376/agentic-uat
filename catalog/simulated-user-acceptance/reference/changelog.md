@@ -6,6 +6,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 3.8.2 断点字段 GFM 表格修复批
+
+将 artifact §6.2 与 ACG extended-unattended-appendix 的断点字段由 text 代码块改为真实 Markdown 表格，按标识/依赖/重试/副作用/后续分组，保留全部 18 个必填字段，修复竖线被当普通文本渲染的问题。仅格式与展示修复，不改变自主长任务内核和并行接管边界。
+
 ## 3.8.1 自主长任务边界残留清理批
 
 清理 3.8.0 改名后的局部残留：obs/contract 注释与职责仅 PARALLEL_UNATTENDED；所有模式始终记录逻辑 READY/WAITING/BLOCKED/DONE；§7 指针明确 §6.0 为共享自主长任务内核、§6.1–6.4 为并行契约；runbook/tool 统一为逻辑 READY。独立复核五组残留全部 CLOSED。frontmatter description/routing 不变，仅补丁版本步进。

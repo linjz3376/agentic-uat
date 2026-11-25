@@ -7,6 +7,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.8.2 断点字段 GFM 表格修复批
+
+extended-unattended-appendix 的「每个未完成 AC 的断点」由 text 代码块改为 GFM 表格，分五组列出全部必填字段，修复表格不渲染/竖线异常。同步 SUA artifact §6.2 保持同构；不改变 SINGLE_WRITER 与 PARALLEL_UNATTENDED 语义。
+
 ## 1.8.1 并行模式残留清理批
 
 双模板与 self-check 精确使用 SINGLE_WRITER/PARALLEL_UNATTENDED；共同前置、物理队列、四件套和样例索引不再使用 SINGLE/EXTENDED 旧称。negative-focus 明确只拦单写者误带并行 schema；缺字段负例标 PARALLEL_UNATTENDED。独立复核最后一处 EXTENDED 残留已修复。frontmatter description/routing 不变，仅补丁版本步进。
