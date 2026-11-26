@@ -18,6 +18,7 @@
 | 7 | 真实旅程完整 | 至少一条真实 persona 产品旅程；动机/起点/连续基本流/交接/最终结果齐；AC 挂靠与场景完成分开；禁止域批吞并全部 AC；异常恢复成对 | 只闭合矩阵；G-DOM 关联全部 AC；只有控件清单没有业务目标 |
 | 8 | 人类界面主证 | GUI 有截图/DOM，TUI/CLI 有终端读屏/输出，人类 API 有调用方可见响应+最终业务结果；对话框双路径；MACHINE 有真机器契约；DOC 独立审计 | 用内部 API 判人类界面；只验确认；DOC 冒充产品验证；事后补证 |
 | 9 | 所选执行模式冻结 | SINGLE_WRITER 默认含共享状态机/逻辑四态/长窗收判/超时/最小断点；PARALLEL_UNATTENDED 仅实际并行/接管时内联租约/CAS/fencing/分片归并；静态出处不作运行依赖 | SINGLE_WRITER 携带 CAS/fencing；PARALLEL_UNATTENDED 缺恢复；动态追随外部版本 |
+| 10 | 组合覆盖可归格 | 按需展开 Cell/Case；Run 主表+Run-Case 明细粒度唯一，必需格全有 Case，复验复用 Case并以最新完整 Run 作基线，部分 ❌不得被旧 ✅吞没，AC 聚合主/次断言，计划引用证据归格 | 以 AC/场景/REVERIFY 数代替组合覆盖；孤儿证据计分；场景重排改 Case；Pairwise 冒充穷尽 |
 
 ## ISO/IEC/IEEE 29119-3 对照（治理模式体检用）
 

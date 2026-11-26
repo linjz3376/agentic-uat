@@ -49,4 +49,5 @@
 - 技术信号直接判 UAT 缺陷：控制台/日志/网络/内部数据先记 TECH-OBS；无 persona 入口承诺失败关联不得形成 UAT ❌。
 - 单写者误带并行 schema：SINGLE_WRITER 不得出现租约/CAS/fencing/多写者接管，但必须含共享状态机/逻辑四态/长窗收判/超时；PARALLEL_UNATTENDED 仅实际并行/接管使用。不得以文档轻量为名删除自主长任务能力。
 - 缺陷只有技术标题：每条缺陷摘要必须含 persona+业务目标+真实入口+实际/预期结果，技术根因另列。
+- AC/场景/复验数冒充组合覆盖：单断言 AC 不需要合并，应补 Cell/Case/Run；场景重排不得改 Case，REVERIFY 不新增设计覆盖，未映射证据零 credit。高风险分支写「待验」却无 Cell/Case=设计漏项；Pairwise 只覆盖所选样本，固定 64 条不等于覆盖完整。
 

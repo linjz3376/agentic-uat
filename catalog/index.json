@@ -7,7 +7,12 @@
         "references/coverage-metrics.md",
         "references/exception-baseline.md",
         "references/executable-standards.md",
+        "references/gate-samples/coverage-execution-model.md",
+        "references/gate-samples/coverage-permission-governance.md",
+        "references/gate-samples/coverage-repayment.md",
+        "references/gate-samples/coverage-user-order.md",
         "references/gate-samples/negative-book.md",
+        "references/gate-samples/negative-coverage-mapping.md",
         "references/gate-samples/negative-execution-book.md",
         "references/gate-samples/negative-focus-book.md",
         "references/gate-samples/negative-id-reference.md",
@@ -38,7 +43,7 @@
         "templates/task-instruction.md"
       ],
       "name": "acceptance-contract-governance",
-      "version": "1.8.3"
+      "version": "1.9.0"
     },
     {
       "files": [
@@ -53,7 +58,7 @@
         "SKILL.md"
       ],
       "name": "simulated-user-acceptance",
-      "version": "3.8.3"
+      "version": "3.9.0"
     }
   ]
 }

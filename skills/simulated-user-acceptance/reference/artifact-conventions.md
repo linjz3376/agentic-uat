@@ -7,7 +7,7 @@
 
 ```text
 <report-root>/                        # 默认 tests/reports/<YYYY-MM-DD>-<domain>/
-├─ execution-log.md                   # 必需：环境/预算/最小断点/逐 AC；逻辑四态所有模式；并行契约仅 PARALLEL_UNATTENDED
+├─ execution-log.md                   # 必需：环境/预算/最小断点/逐 AC；profile 启用时含 Run 主表/Run-Case 明细/Case 当前状态；逻辑四态所有模式
 ├─ defects.md                         # 必需：已定性+待定性+风险接受+阻塞
 ├─ final-report.md                    # FINAL / FINAL-WITH-GAPS
 ├─ interim-report-<YYYY-MM-DD>.md     # INTERIM，与 final 二选一
@@ -21,7 +21,7 @@
 │  ├─ control-matrix.json             # 有 UI 涉验页时必需
 │  └─ results.json                    # 使用机算结果文件时采用；非唯一载体
 ├─ cleanup-list.md                    # 有造数/清场债务时必需
-├─ coverage-table.md                  # 任务书要求时必需
+├─ coverage-table.md                  # 任务书要求时必需；coverage profile 启用时含 Cell/Case、Run 主表、Run-Case 明细与当前状态
 ├─ appendix/                          # 可选扩展与清单
 ├─ tooling/                           # 项目授权内的本轮工具快照
 └─ exploration/                       # 可选 G0/SBTM
@@ -35,13 +35,14 @@
 
 | 文件 | 必须包含 | 禁止包含 |
 |---|---|---|
-| `execution-log.md` | 环境闸、授权引用、执行模式、预算、最小断点、逐 AC 状态/证据/缺陷、造数与恢复；所有模式始终记录逻辑 READY/WAITING/BLOCKED/DONE；物理四队列/租约仅 PARALLEL_UNATTENDED | 大段报告正文；凭据；SINGLE_WRITER 伪造并行租约 |
+| `execution-log.md` | 环境闸、授权引用、执行模式、预算、最小断点、逐 AC 状态/证据/缺陷、造数与恢复；coverage profile 启用时含 Run 主表、Run-Case 明细和 Case 当前状态；所有模式始终记录逻辑 READY/WAITING/BLOCKED/DONE；物理四队列/租约仅 PARALLEL_UNATTENDED | 大段报告正文；凭据；SINGLE_WRITER 伪造并行租约；以 REVERIFY 文件数冒充 Case 数 |
 | `defects.md` | 已定性表、待定性表、统计、风险接受清单、阻塞项、该轮新增十段式副本 | 无留痕关闭项；凭据 |
 | `final-report.md` | 报告状态、未触核验、总览/域/维度、缺陷、对账、残留、结论 | 与当前 interim 并存 |
 | `interim-report-<date>.md` | 未触/预算/证据缺口、补测任务单、已完成结论、final 暂缓原因 | 冒充产品已验收 |
 | `evidence/` | 判定同时刻截图/DOM/网络/机器响应/对账；失败时原始错误与结构化尝试记录 | 事后补拍冒充；无关个人数据 |
 | `imports/`、`exports/` | 原始文件及五要素清单 | 二次编辑冒充原件 |
 | `obs/contract.md` | 仅 PARALLEL_UNATTENDED：本文 §6.1 至 §6.4 的租约、物理队列、接管与收判包；§6.0 共享内核仍写 execution-log | 硬编码密钥；SINGLE_WRITER 创建此文件 |
+| `coverage-table.md` | 任务书要求的需求对账；coverage profile 启用时含维度/约束、Cell/Case、Run 主表/Run-Case 明细/Case 当前状态、派生度量和未覆盖债务 | 先定 Case 数量；历史 PASS 拼接；孤儿证据计入覆盖 |
 
 ## 3 命名细则
 
@@ -54,6 +55,8 @@
 
 - 步骤用英文短词，避免空格与中文；同一 AC 多张证据按步骤区分，不覆盖。
 - 允许 png/json/txt/md/pdf/bin/xlsx 等任务书声明格式；无法采集时使用 `<AC-ID>_captureFailure_<时间戳>.txt` 留原始错误。
+- 启用 coverage profile 时，证据 manifest 或等效索引必须引用 Run×Case×assertion，并可追溯 Run 主表的 run_kind、reverify_of、环境、判据哈希和观测时刻；文件名保留 AC 规则即可，不因场景重排改 Case。`REVERIFY-*` 仅是执行索引，必须回挂原 Case/AC，不能独立提供覆盖 credit。
+- 共享证据须逐 Case/AC 映射到具体可区分断言；无法证明同一事实支持多个断言时，只归其实际证明的 Case/AC，禁止批量挂账或事后改标 UNMAPPED_OBSERVATION 规避。
 
 ### 3.2 导入/导出与报告
 
@@ -93,13 +96,13 @@ interim-report-<YYYY-MM-DD>.md；同日多份追加 -2、-3 并登记
 
 ### 4.3 报告三态（共同前置+顺序判定）
 
-UAT 身份前置=至少一条真实 persona 产品旅程有定性结论，DOC 不参与。所有模式共同前置=每个计划产品 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED。SINGLE_WRITER 另核逻辑四态已落 execution-log、最小断点无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序取首个命中：
+UAT 身份前置=至少一条真实 persona 产品旅程有定性结论，DOC 不参与。所有模式共同前置=每个计划产品 AC 均为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类 BLOCKED；启用 coverage profile 时计划 Case 也全部终态/归因闭合。SINGLE_WRITER 另核逻辑四态已落 execution-log、最小断点无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序取首个命中：
 
 | 顺序 | 条件 | 状态 | 文件 |
 |---:|---|---|---|
-| 1 | 任一入口 PARTIAL；或 OMITTED/BUDGET_EXHAUSTED；或 UI 主证/计划产物缺口；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或任一 S/G 缺稳定 ID、证据或合法映射 | INTERIM | `interim-report-<date>.md` |
-| 2 | 不满足 INTERIM，且存在至少一个 BLOCKED/未裁定 ⏸️/控件 S/G；BLOCKED 全为合法外部归因或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射 | FINAL-WITH-GAPS | `final-report.md`，头部声明全部 BLOCKED/⏸️/S/G 缺口 |
-| 3 | 不满足前两类；BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应入口主证=100%、计划产物完整、S+G=0 且 O=P | FINAL | `final-report.md` |
+| 1 | 任一 AC/Case PARTIAL；或任一 AC/Case OMITTED/BUDGET_EXHAUSTED；或 UI 主证/计划产物缺口；或计划 Case 映射/证据要件缺失、范围内孤儿证据被用作主证；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或任一 S/G 缺稳定 ID、证据或合法映射 | INTERIM | `interim-report-<date>.md` |
+| 2 | 不满足 INTERIM，且任一 AC/Case 存在合法外部 BLOCKED、未裁定 ⏸️或控件 S/G；BLOCKED 全为合法外部归因或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射 | FINAL-WITH-GAPS | `final-report.md`，头部声明全部 BLOCKED/⏸️/S/G 缺口 |
+| 3 | 不满足前两类；AC/Case 两层均 BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应入口主证=100%、计划产物完整、S+G=0 且 O=P | FINAL | `final-report.md` |
 
 - ❌ 不阻止 FINAL：产品失败不等于执行未完成。
 - 自主模式全项有证据且无缺口可 FINAL；有未裁定 ⏸️、外部 BLOCKED 或合法控件缺口时不得 FINAL。只有 ⏸️ 或 S/G、没有 BLOCKED 也可 FINAL-WITH-GAPS；完全没有缺口时禁止 WITH-GAPS。
@@ -118,8 +121,21 @@ BLOCKED → 归因审计
 
 - OMITTED 优先补不依赖外部条件的项；补测不改原标准。
 - OMITTED-PENDING 不得进入 FINAL 系；可以带补测任务单进入 INTERIM 并 CLOSED。
-- 补测任务单字段：AC、前置、预计耗时、负责人、期限、状态、触发器或 N/A。
+- 补测任务单字段：AC、前置、预计耗时、负责人、期限、状态、触发器或 N/A；启用 coverage profile 时另带 Cell/Case，复验沿用原 Case 并新建 Run。
 - UNREACHABLE 防伪抽查只复现有证据的路径；观测通道失效不得要求伪造截图。
+
+### 4.5 覆盖格、子用例与复验归格
+
+任务书启用 coverage profile 时，以其冻结 Cell/Case/派生公式为唯一本轮口径，不在执行侧另造分母或热追随技能新版：
+
+1. **三层执行记录**：Run 主表一行一次执行，Run-ID 唯一，记录 run_kind/reverify_of/environment/criteriaHash/observed_at；Run-Case 明细一行一个 Run×Case，联合键唯一，逐断言 verdict/evidence；Case 状态表记 currentRun-ID/N/A、当前判定和证明。S-ID 只负责旅程映射，场景重排不改 Case/Cell/AC。
+2. **当前 Run 与复验**：同 Case 以本轮同环境同判据的最新完整 FULL Run-Case 作基线，REVERIFY 以 reverify_of 核原 Case/AC/Cell。较晚 PARTIAL Run-Case 只补充或降级：部分 ✅不得整体翻绿，部分 ❌必须覆盖旧 ✅并阻止 Case/AC ✅；无完整基线时部分 ✅只能 PARTIAL。INITIAL❌→FULL REVERIFY✅可更新，INITIAL❌→PARTIAL ✅仍 ❌，INITIAL✅→FULL/PARTIAL ❌均 ❌；所有 Run 与部分断言保留，跨轮原 Run 仅作身份索引。
+3. **状态适配证据**：✅/❌/PARTIAL/⏸️ 必须有实际 Run-Case 和对应主证；⏭️ 可以无产品执行 Run但须有存在性/通道证据；BLOCKED 可以 Run=N/A，以归因证明和解除条件闭合，DEFERRED/OMITTED 不伪造执行 Run。Evidence 引用 Run×Case×assertion，重复复用也逐断言登记。
+4. **AC 聚合**：Case 聚合自身全部断言，AC 聚合所有主/次关联计划断言；次断言失败必须阻止对应 AC ✅。展示优先级为 ❌→PARTIAL→⏸️→BLOCKED→⏭️→全 ✅才 ✅，混合通过+外部阻塞保持 BLOCKED 而非 PARTIAL；MIXED 必须附完整 cause 集合/断言链接，缺明细保守 INTERIM，含 BUDGET/OMITTED 必 INTERIM，其余残余状态仍留台账并参与报告。
+5. **引用决定分类**：凡被计划 Run-Case、Case 状态、AC 判定、报告主证表或覆盖分子引用的证据均须归格，改标 UNMAPPED_OBSERVATION 或撤销声明不能豁免。只有 EXPLORATORY、Case/AC/Cell=N/A 且无任何计划引用的观察才合法 UNMAPPED_OBSERVATION；普通无引用附件记 UNREFERENCED_ARTIFACT，不机械改变三态但也零 credit。被计划引用后自动转待归格，映射不全为孤儿、零 credit，充作主证则 INTERIM。复杂/高风险 BLOCKED 必须挂 Cell/Case/AC、归因、解除条件和残余风险。
+6. **CLOSED 与三态**：CLOSED 只要求 AC/Case 均终态或归因、判定登记、缺口记录和保底报告签发，证据完整性不另作 CLOSED 前置。仍 READY 的 Case 先续跑，无法续跑则转有归因 BLOCKED。三态同时检查计划 AC 与计划 Case：PARTIAL、OMITTED/BUDGET、映射/主证要件缺失→INTERIM；合法外部 BLOCKED/要件齐的 ⏸️→WITH-GAPS；两层均 BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0且证据完整才 FINAL。执行期新发现设计缺 Cell 时登记生成缺陷并尽量映射，无法修复则 INTERIM+CLOSED。
+
+历史 profile、Run 和证据只作独立治理 crosswalk/复验索引，不自动成为本轮证据；每轮重新执行并计算本轮指标，禁止跨轮拼接。
 
 ## 5 场景、主证与产物闸
 
@@ -139,14 +155,15 @@ BLOCKED → 归因审计
 
 1. 实际树与任务书 profile 映射一致；必需文件按适用条件存在。
 2. 根目录仅含任务树或本规范白名单；扩展集中 obs/appendix/tooling。
-3. 证据命名与 AC/步骤/时间戳可反查。
+3. 证据命名与 AC/步骤/时间戳可反查；启用 coverage profile 时另与 Run×Case×assertion 可反查，计划引用孤儿证据 credit=0，合法无计划引用探索观察例外。
 4. 脚本只在 tooling 或任务书指定目录并登记。
-5. 证据超过 20 个时生成 manifest 或等效索引。
+5. 证据超过 20 个或启用 coverage profile 时生成 manifest 或等效索引。
 6. 报告附录声明扩展产物、脚本目录和 manifest。
 7. Markdown 相对链接零断链；树外引用有相对路径和「树外」标注。
 8. 台账快照有日期后缀及来源；活源不可达时按任务书头部快照和本轮新增重建。
 9. 缺陷十段式唯一事实源为跨轮台账；defects.md 为本轮汇总及新增副本。
 10. 修复产物缺口后全扫同类实例；校验器须通过一正一反样例才可采信。
+11. 启用 coverage profile 时，必需 Cell→Case 双向对账，Run-ID 唯一、Run×Case 联合键唯一；已执行 Case 有 Run-Case/主证，⏭️ 有存在性证据，BLOCKED 有归因证明而不强制 Run；计划 Case 全闭合，计划引用无孤儿证据，高风险未覆盖格和探索转化债务有清单，无固定 Case 数目标或跨轮 credit。
 
 ### 5.3 报告内容 15 项
 
@@ -163,7 +180,7 @@ BLOCKED → 归因审计
 11. 场景完成表。
 12. 入口证据表；UI PASS 主证不足直接 INTERIM。
 13. G0/SBTM 记录。
-14. 覆盖度量三行；机算优先，工具缺失按统一公式手工对账并留痕，分母 0 标 N/A+理由。
+14. 基础覆盖度量三行；启用 coverage profile 时另列必需格归格率、计划子用例执行覆盖率/闭合率、高风险未覆盖格、孤儿证据数与探索转化债务。机算优先，工具缺失按内联公式手工对账并留痕，分母 0 标 N/A+理由，不以派生指标设产品质量及格线。
 15. 控件清单与计划操作：同时列 I/P/O/S/G、原始 O/P、O/(P-S)、每个 S/G 的 control_id+证据+归因。S 只收获接受 DEFERRED；外部不可达/未授权/观测限制的未操作项进入 G。FINAL 要 S+G=0 且 O=P；S/G 逐项有合法映射才可达 FINAL-WITH-GAPS；缺证明、无映射、OMITTED/BUDGET_EXHAUSTED 均 INTERIM。执行前未纳入 P 的探索档候选不算缺口，禁止执行后改列抽样或 S。
 
 控件统一按稳定 `control_id` 去重，动作行数不等于控件数：`I`=范围内清单控件数，`P`=执行前锁定的计划操作控件数，`O`=P 中完成有效操作的唯一控件数（计划外操作另列），`S`=P 中获接受 DEFERRED 的唯一控件数，`G=P\(O∪S)`=其余计划缺口的唯一控件集合。必须满足 P=O+S+G，O/S/G 互斥。未授权、不可达、观测受限未操作项进 G 并带对应归因，不得挤入 S。清单覆盖率=已落 AC/N/A 的唯一控件数/I；操作率同时展示原始 O/P 与 `O/(P-S)`，分母 0 标 N/A+理由，不得只展示扣除后的 100%。DOM、a11y、视觉按稳定键合并，a11y 只提供差集线索。

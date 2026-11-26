@@ -20,7 +20,7 @@
 | 授权矩阵 | SUA + 项目/全局安全红线 | ACG 生成授权清单；操作者显式确认范围，项目更严规则优先 |
 | 场景模型 | ACG | 每关键业务目标有连续基本流/交接/最终结果；禁止域批吞并全部 AC；场景完成与 AC 挂靠分开 |
 | 报告三态、保底报告、产物核心约束、命名 | SUA | ACG 固化快照；任务书仅选合法 profile/扩展 |
-| 覆盖公式 | ACG `coverage-metrics.md` | 任务书内联公式；SUA 不另定义分子分母 |
+| 覆盖公式与组合身份 | ACG `coverage-metrics.md` | 任务书内联公式及按需 Cell/Case；SUA 以 Run 主表/Run-Case 明细和当前有效 Run 归格执行，不另定义分子分母，不以场景/复验数替代 Case |
 | 缺陷分类与 BLOCKED 六类归因 | SUA | 项目台账持状态；报告签发不等待缺陷修复 |
 | 执行契约与写者接管 schema | SUA `artifact-conventions.md` | ACG 内联字段骨架，运行时值由执行者填 |
 | 经验回灌 | ACG 下轮吸收合法事实 | 未获项目文档写授权时只留建议，不阻塞 CLOSED |
@@ -36,8 +36,8 @@
 
 ```text
 操作者意图与授权范围
-  → ACG：源头对账→风险/预算→场景与 AC→内联冻结规范
-  → SUA：按 SINGLE_WRITER/PARALLEL_UNATTENDED 执行真实连续旅程→局部受阻续跑
+  → ACG：源头对账→风险/预算→场景与 AC→按需 Cell/Case→内联冻结规范
+  → SUA：按 SINGLE_WRITER/PARALLEL_UNATTENDED 执行真实连续旅程→Run/证据归格→局部受阻续跑
   → 报告首节给关键旅程定性结论→CLOSED（FINAL / FINAL-WITH-GAPS / INTERIM）
   → 独立后续：缺陷修复、风险接受、经验回灌、下轮生成
 ```
@@ -61,3 +61,4 @@
 | 技术信号直接成为 UAT 缺陷 | TECH-OBS 与 persona 入口结果分离 |
 | 技能研发治理进入常驻生成 | 仅 maintainer-guide，不参与任务生成 |
 | 操作者未签署导致永不收口 | 执行关闭与风险接受分层 |
+| 场景/复验数量掩盖组合缺口 | ACG Cell/Case 设计闭格；SUA Run/证据归格，孤儿证据零 credit |

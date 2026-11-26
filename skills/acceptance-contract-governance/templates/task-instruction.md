@@ -8,6 +8,7 @@
 - 需求来源与快照：<PRD/设计/用户承诺/无 PRD 降级声明；版本或日期>
 - 缺陷台账快照：<生成日+静态来源>
 - 对账摘要：需求 N 条→覆盖 K/⏭️ P/⏸️ Q/纯未覆盖 0
+- 组合覆盖摘要：启用 coverage profile 时填必需 Cell M→计划 Case C；仅全任务所有 AC 均无客观触发才整书 N/A并逐项留证明，任一 AC 触发即启用，其余独立 AC 以隐式单格简并；禁止先定 Case 数量倒推覆盖
 - 报告根：`<获准 report-root>`；产物 profile：`<布局/扩展>`，不得降低本任务书安全、主证和三态约束
 - UAT 身份：至少一条真实 persona 产品旅程，含动机/起点/连续步骤/交接/最终入口结果；DOC-only 不得称 UAT。
 - 执行模式：默认 `SINGLE_WRITER`，始终含共享状态机、逻辑 READY/WAITING/BLOCKED/DONE、当前步骤、下一动作、解除条件、resumeAfter、一次性收判、超时、预算、副作用对账、证据和最小断点；长窗原地续跑，不另出书/重复授权。只有真实并行写者/外部接管才选 `PARALLEL_UNATTENDED`，由生成侧内联扩展契约，不留外部指针。
@@ -115,6 +116,24 @@
 |---|---|---|---|
 | <AUDIT-ID> | <需求/路由/证据> | <文档/清单> | <覆盖/缺口> |
 
+### 3.B 按需业务覆盖 profile（多条件/状态/复验归格时必填）
+
+仅全任务所有 AC 均无联合条件、判定表/状态转换、高风险组合、场景重分组或跨场景/复验归格时，才可整书 N/A并逐项留证明；任一 AC 触发即启用，触发按业务判定关系而非 AC 文本拆分结果。其余独立 AC 以隐式单 Cell/单 Case 简并，无需虚构维度表。启用时以下三表完整内联，业务维度只来自本轮 test basis，不照抄任何行业夹具。
+
+| dimension | values | source | constraints/applicability |
+|---|---|---|---|
+| <业务轴> | <候选取值> | <当前条款/侦察> | <互斥/依赖/不可达及理由> |
+
+| Cell-ID | condition tuple | source | risk | selection | PLANNED/CANDIDATE/EXCLUDED+理由 |
+|---|---|---|---|---|---|
+| <Cell-ID> | <有效条件组合> | <出处> | <关键/标准/探索> | <MANDATORY/PAIRWISE/BOUNDARY/STATE等> | <归宿；Pairwise 标非穷尽> |
+
+| Case-ID | primary Cell | primary AC | secondary Cell/AC+独立断言 | S-ID/步骤 | 数据/前置 | 预期 |
+|---|---|---|---|---|---|---|
+| <Case-ID> | <唯一主 Cell> | <唯一主 AC> | <可选；不重复计 Case> | <旅程映射> | <可复现输入> | <可判定结果> |
+
+每个必需 Cell 至少一个主 Case；Case 固定一个主 Cell+主 AC。场景重排不改 Cell/Case/AC，复验复用 Case 新建 Run；关键档/高风险的边界、非法转换和明确拒绝格不得被 Pairwise 抽样替代，普通边界/拒绝格可按风险抽样并列残余风险，Case 数由选择结果派生，禁止先定 31/64 等目标。
+
 ## 3.5 深度维度与风险选择
 
 | 维度 | AC-ID 或 N/A+理由 | 关键强制项 | 标准/探索抽样与残余风险 |
@@ -131,7 +150,7 @@
 | D10 可观测性 | | | |
 | D11 体验/兼容 | | | |
 
-D1 永远先行，密度按域类型分档；负向 30% 为 P2 质量基线，低于时写偏离，不与「关键安全项必做」混淆。条件达到 4 个时用 Pairwise+高风险组合，不叠加指数级全量。
+D1 永远先行，密度按域类型分档；负向 30% 为 P2 质量基线，低于时写偏离，不与「关键安全项必做」混淆。条件达到 4 个时用 Pairwise+高风险组合，不叠加指数级全量。D1 至 D11 是测试技术轴，§3.B 是业务条件轴，两者分别对账，不得相互替代。
 
 ## 4 判据表
 
@@ -144,6 +163,7 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 ## 5 完成准则（CLOSED 最小条件，不要求全 PASS）
 
 - [ ] 每个产品 AC 为 DONE（✅/❌/PARTIAL/⏭️/⏸️）或六类归因 BLOCKED；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0，SINGLE_WRITER 在 execution-log 保留逻辑四态，不创建并行写者契约。
+- [ ] 启用 coverage profile 时计划 Case 全部终态/归因闭合，缺口、孤儿证据、高风险未覆盖格与探索转化债务逐条登记；证据完整性只影响三态，不作为 CLOSED 的额外前置，无法修复时签 INTERIM 保底报告。
 - [ ] 判定·登记原子化，未登记清单为空；最小断点已更新，PARALLEL_UNATTENDED 模式另更新物理四队列。
 - [ ] 报告已签发；产物格式失败也签保底报告。
 - [ ] 回合收尾：进度对账、登记清零、断点更新、一次性收判或 N/A；PARALLEL_UNATTENDED 模式使用扩展四件套；SINGLE_WRITER 无长窗不排程，有长窗必须使用一次性收判。
@@ -151,7 +171,7 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 ### 报告判定输入（缺口决定 INTERIM，不反向阻止 CLOSED）
 
 - [ ] 入口证据已登记：UI PASS=0 时写 N/A+理由；UI PASS>0 且主证不足 100% 时降 INTERIM；MACHINE 核契约；DOC 只进独立 coverage-audit。
-- [ ] 页面清单、计划控件 P/O/S/G、场景、G0/SBTM、计划 B 点、方法和覆盖三行有对账；任一 PARTIAL 均 INTERIM。
+- [ ] 页面清单、计划控件 P/O/S/G、场景、G0/SBTM、计划 B 点、方法和基础覆盖三行有对账；启用 profile 时另有 Cell/Case/Run-Case 归格与派生度量；所有计划判定引用证据必须归格，合法无计划引用探索观察除外；任一 PARTIAL 均 INTERIM。
 - [ ] ❌/⏸️ 分别登记已定性/待定性缺陷；缺陷修复不作为停止前置。
 - [ ] 造数、副作用 ID、幂等键、清场债务、恢复对账和传输清单已登记；未授权清理不执行。
 - [ ] Final-Report-Gate 按 §9 的顺序判定；只有满足 FINAL 条件才标 FINAL。
@@ -174,6 +194,8 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 14. 控件 P 执行前锁定；获接受 DEFERRED 进 S，其余未操作计划项进 G=P−O−S 并逐控件归因；禁止事后改列抽样或 S。控件数量只作审计，不代替旅程完成。
 15. 每域技术巡检按适用性执行；控制台/网络/日志/内部状态先记 TECH-OBS，无 persona 入口失败关联不得形成 UAT ❌。
 16. 每场景结束写「persona+业务目标+实际连续路径+完成/失败/受阻+用户可见结果+主证」，再按 Final-Report-Gate 出报告。
+17. 启用 coverage profile 时，Run 主表一行一次执行且 Run-ID 唯一；Run-Case 明细一行一个 Run×Case，逐断言 verdict/证据，联合键唯一；Case 状态表记 currentRun/N/A。✅/❌/PARTIAL/⏸️ 要实际 Run-Case，⏭️ 要存在性证据，BLOCKED 可以无执行 Run但要有归因证明和解除条件。
+18. 同一 Case 以本轮同环境同判据的最新完整 FULL Run-Case 作基线；REVERIFY 以 reverify_of 核原 Case/AC/Cell。较晚 PARTIAL 只补充或降级：部分 ✅不整体翻绿，部分 ❌必须覆盖旧 ✅并阻止 Case/AC ✅，无完整基线时部分 ✅只能 PARTIAL。AC 聚合主/次所有断言，次失败不得判 AC ✅；任一残余 BLOCKED/⏸️ 不得被其他 ✅吞没，MIXED 必须附完整 cause 集合，缺明细保守 INTERIM。场景重排不改 Case，计划引用证据必须归格，UNMAPPED_OBSERVATION 仅限无任何计划引用的 EXPLORATORY，普通无引用附件记 UNREFERENCED_ARTIFACT，改标签不能豁免。
 
 ## 7 缺陷流转与冲突/存在性登记
 
@@ -227,6 +249,22 @@ AI/LLM 类优先使用 golden set；未建时标人工判定并给核对要点�
 - 需求覆盖率=本轮实际发生产品验证的需求条目数/需求条目总数；仅当至少一个承接 AC 本轮为 ✅/❌/PARTIAL/⏸️ 才计入，设计期覆盖桶或全 BLOCKED 不计；⏭️ 不计。
 - UI 证据覆盖率=有判定时对应入口主证的 UI PASS 数/UI PASS 数；UI PASS=0 时 N/A+理由，大于 0 且不足 100% 时 INTERIM。
 - 未触率=归因审计后仍为 BLOCKED 的唯一 AC 数/AC 总数；六类 BLOCKED 全计，只有补测后不再 BLOCKED 才剔除；AC 总数为 0 时 N/A+理由。
+- 启用 coverage profile 时另算：必需格归格率=有主 Case 的必需 Cell/必需 Cell（生成期 100%）；计划子用例执行覆盖率=当前有效 Run-Case 有本轮有效产品验证的唯一计划 Case/计划 Case（同 Case 多 Run 只计一次）；计划子用例闭合率=终态或六类 BLOCKED 的计划 Case/计划 Case（报告前置 100%）。高风险未覆盖格、孤儿证据数、探索转化债务逐条列出，分母 0=N/A+理由，不设产品质量及格线。
+
+| Run-ID | run_kind | reverify_of | environment | criteriaHash | observed_at |
+|---|---|---|---|---|---|
+| <唯一 Run-ID> | <INITIAL/REVERIFY/EXPLORATORY> | <原 Run 或 N/A> | <环境> | <判据哈希> | <时间> |
+
+| Run-ID | Case-ID | primary AC | primary Cell | assertionCoverage | assertions（AC-ID#assertion=verdict） | evidence（Run×Case×assertion） |
+|---|---|---|---|---|---|---|
+| <Run-ID，可复用> | <唯一 Case> | <主 AC> | <主 Cell> | <FULL/PARTIAL> | <逐断言判定；禁止单行多 Case> | <逐断言证据> |
+
+| Case-ID | currentRun-ID/N/A | current verdict | proof/解除条件 |
+|---|---|---|---|
+| <Case-ID> | <最新完整基线 Run 或无执行 N/A> | <本轮当前判定> | <主证/存在性/归因/冲突要件> |
+
+同 Case 以本轮同环境同判据的最新完整 FULL Run-Case 作基线；较晚 PARTIAL 只补充或降级，部分 ✅不整体翻绿，部分 ❌必须覆盖旧 ✅并阻止 Case/AC ✅，无完整基线时部分 ✅只能 PARTIAL。AC 聚合主/次全部计划断言，优先级为 ❌→PARTIAL→⏸️→BLOCKED→⏭️→全 ✅才 ✅，MIXED 必须附完整 cause 集合，其余残余状态仍参与报告。计划关联证据按引用判定，改标 UNMAPPED_OBSERVATION 不能豁免。
+
 - 机算优先，无工具按上述公式手工对账留痕，不得虚构机算。
 
 | PRODUCT 需求条目 | 条款出处 | 承接产品 AC | 设计期桶位 | 执行期落判 | 是否计入分子+理由 |
@@ -239,12 +277,12 @@ AUDIT 条目不进入上表。DOC-only 使用 AUDIT-ID 在下表记已核/未核
 |---|---|---|---|
 | <AUDIT-ID> | <DOC-only 或混合条目的审计面> | <对账记录> | <状态> |
 
-报告头只含任务 ID、环境、运行状态、授权/偏离。第一节=关键旅程定性结论；第二节=用户语言缺陷与残余风险（无缺陷写无）；第三节起=需求覆盖率/UI 主证覆盖率/未触率、场景/控件矩阵、TECH-OBS 和产物清单。机算优先，无工具按内联公式手工对账留痕；分母 0=N/A+理由。
+报告头只含任务 ID、环境、运行状态、授权/偏离。第一节=关键旅程定性结论；第二节=用户语言缺陷与残余风险（无缺陷写无）；第三节起=需求覆盖率/UI 主证覆盖率/未触率、按需 Cell/Case 派生度量、场景/控件矩阵、TECH-OBS 和产物清单。机算优先，无工具按内联公式手工对账留痕；分母 0=N/A+理由。
 
-UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻结论，DOC 不进 AC/需求分子/三态。所有模式共同前置=每个计划产品 AC 为 DONE 或六类 BLOCKED；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项且不创建并行写者契约，PARALLEL_UNATTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。按顺序判定：
-1. INTERIM：任一入口 PARTIAL；或 OMITTED/BUDGET_EXHAUSTED；或主证/计划产物缺口；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或 S/G 缺稳定 ID、证据、合法映射。可 CLOSED。
-2. FINAL-WITH-GAPS：不满足 INTERIM且存在 BLOCKED/未裁定 ⏸️/S/G；BLOCKED 全为 UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED 或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射。无缺口不得本态。
-3. FINAL：不满足前两类；BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时 N/A 或主证 100%、计划产物完整、S+G=0 且 O=P。❌ 不阻止 FINAL；自主全项无缺口也可 FINAL。
+UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻结论，DOC 不进 AC/需求分子/三态。所有模式共同前置=每个计划产品 AC 为 DONE 或六类 BLOCKED，启用 coverage profile 时计划 Case 也全部终态/归因闭合；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项且不创建并行写者契约，PARALLEL_UNATTENDED 才核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。仍 READY 的 Case 先续跑，无法续跑则转有归因 BLOCKED。按顺序判定：
+1. INTERIM：任一 AC/Case PARTIAL；或任一 AC/Case OMITTED/BUDGET_EXHAUSTED；或主证/计划产物缺口；或计划 Case 映射/证据要件缺失、把范围内孤儿证据当主证；或 ⏸️ 缺待定性/默认建议；或 P=O+S+G 不成立；或 S/G 缺稳定 ID、证据、合法映射。可 CLOSED。
+2. FINAL-WITH-GAPS：不满足 INTERIM且任一 AC/Case 存在合法外部 BLOCKED、未裁定 ⏸️或控件 S/G；BLOCKED 全为 UNREACHABLE/UNAUTHORIZED/OBSERVABILITY_BLOCKED 或获接受 DEFERRED；⏸️ 要件齐；S/G 逐项有同类合法映射。无缺口不得本态。
+3. FINAL：不满足前两类；AC/Case 两层均 BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0、UI PASS=0 时 N/A 或主证 100%、计划产物完整、S+G=0 且 O=P。❌ 不阻止 FINAL；自主全项无缺口也可 FINAL。
 - 保底报告至少含运行状态、环境、逐 AC 终态、阻塞归因、缺陷、已有证据、产物偏差和下一步。任何产物闸不得阻止签发。
 - 收口分层：执行结束、报告签发、风险接受、经验回灌。前两项完成即 CLOSED；后两项未答复不撤销报告、不重启执行。
 
@@ -261,6 +299,6 @@ UAT 身份前置=至少一条真实 persona 产品旅程有完成/失败/受阻�
 ├─ obs/control-matrix.json（有 UI 时）
 ├─ obs/results.json（采用机算文件时）
 ├─ cleanup-list.md（有清场债务时）
-├─ coverage-table.md
+├─ coverage-table.md（启用 coverage profile 时含 Cell/Case、Run 主表、Run-Case 明细与当前状态）
 └─ exploration/（可选）
 ```

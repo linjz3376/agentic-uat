@@ -7,6 +7,10 @@
 
 > 条目格式（2026-11-23 owner 裁定）：一律 `## 版本号 标题` 标题级，全文统一——禁止 bullet/粗体 bullet 等混排形态。标题一律「版本号+批名」短形态，叙事性内容（立法经过/owner 引语/删除阀）一律下沉正文，禁止入题。
 
+## 1.9.0 业务组合覆盖归格批
+
+新增按需 coverage profile：任一 AC 有联合条件、判定表/状态转换、高风险组合、场景重排或跨场景/复验归格即启用，禁止拆 AC 绕过；仅全任务无触发才整书 N/A，独立 AC 以隐式单格简并。以当前 test basis 冻结维度、约束、Cell 和 Case，Case 固定一个主 Cell+主 AC，D1 至 D11 与业务条件轴正交；关键档/高风险边界与拒绝格强制，普通项继续风险抽样。执行采用 Run 主表+Run-Case 明细+Case 状态表，同 Case 以最新完整 FULL Run-Case 作基线，部分 ✅不翻绿、部分 ❌必覆盖旧 ✅，REVERIFY 以 reverify_of 核身份，AC 聚合主/次全部断言，MIXED 保留完整 cause 集合；计划引用决定孤儿证据，换标签不豁免，BLOCKED/⏭️ 可按证据类型无执行 Run。新增唯一 Case 派生度量、混合状态与 AC/Case 双集合三态，证据完整性不额外阻止 INTERIM+CLOSED。新增履约还款、权限治理、用户办单三个设计夹具、一个执行夹具及 15 项逐输入负例，核心不携带行业 schema 键或固定数量目标。替代以 AC/场景/REVERIFY 数量推断组合覆盖，基础三度量和报告三态不变；等效机读契约完整承载同等映射时进退役评审。
+
 ## 1.8.3 Markdown 同型缺陷深度复盘批
 
 全技能复核近期表格与模式改名：exception-baseline 的业务特有槽由单行竖线改为完整六列 GFM 表格；ac-id-rules 的字段序列改为行内 schema，test-depth 的选择关系改用中文，避免裸竖线歧义。`extended-unattended-appendix.md` 更名为 `parallel-unattended-appendix.md`，`negative-extended-missing-field.md` 更名为 `negative-parallel-missing-field.md`，现行引用与 catalog 索引同步，changelog 历史名称保留。断点字段明确为 21 个，self-check 新增去重计数；维护规程补表格分隔行、列数、围栏、伪表格和合法反例检查。仅展示与命名纠偏，不改变执行语义。

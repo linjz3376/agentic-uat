@@ -3,7 +3,7 @@ name: simulated-user-acceptance
 description: "Use when executing simulated user acceptance (UAT), persona-based end-to-end journeys, or organizing acceptance evidence and reports. Enforces entry fidelity: human GUI/TUI/CLI/API stays UI, while MACHINE is reserved for actual machine/external-system callers. Internal interfaces remain auxiliary. Execution runs on a bounded interaction control flow (fresh-perception contract, authoritative-layer verification, progress-proof retry ladder, intent binding, hard budget). Covers browser/Playwright/manual UI, scenario-first execution with risk priority, UI-primary evidence, L1/L2/L3 coverage, boundary derivation, blocked-attribution auditing with retest pull-up and bounded recovery, three-state reporting, artifact-tree gates, and machine-computed coverage metrics."
 license: MIT
 metadata:
-  version: "3.8.3"
+  version: "3.9.0"
   author: "linjz"
   platforms: "linux, macos, windows"
   category: [qa, uat, execution]
@@ -123,7 +123,7 @@ metadata:
 
 - 每个 AC 挂靠真实旅程中的具体步骤；**AC 挂靠不能代替旅程完成判定**。
 - 禁止用 `G-DOM-<域>` 或「管理员场景」默认吞并该域全部 AC。域内按不同业务目标拆场景；同一目标共享旅程时须写出共同动机与连续基本流。
-- 场景完成表与 AC 矩阵分开对账：前者判用户目标，后者只判审计覆盖。
+- 场景完成表与 AC 矩阵分开对账：前者判用户目标，后者只判审计覆盖。启用 coverage profile 时，S-ID 只映射旅程步骤，场景重排不得改 Cell/Case/AC；场景数、AC 数和复验文件数均不代表组合覆盖。
 - 基本流之后执行适用的备选/异常流，并从同一真实入口验证恢复至异常前状态；高风险、权限、资金、不可逆项优先。
 
 ### 真实操作
@@ -140,11 +140,13 @@ metadata:
 - 页面/路由/控件清单属于审计覆盖，不代表业务旅程完成。控件 P 执行前锁定；获接受 DEFERRED 进 S，其余计划缺口进 G=P−O−S，并带稳定 control_id+证据+归因，禁止事后改列抽样或 S。
 - 当前路径连续两次无验证进展→换层重观察→换路径→达到单项预算后终止当前路径。随后保全证据、缩小作用域、写断点并选择下一独立旅程/READY 项。
 - 没有可执行项时才收判或报告；SINGLE_WRITER 无长窗时不得创建常驻巡逻。单写者遇长窗直接在同一任务书内登记 WAITING、解除条件、resumeAfter、超时和一次性收判，条件满足后回 READY；无触发能力或超时则转有归因 BLOCKED，继续其他独立项或出 INTERIM。**不重新生成、不重复授权、不切换并行模式。** PARALLEL_UNATTENDED 仅在真实并行/接管时按扩展契约处理，READY/WAITING 双空才 REPORTING。
-- CLOSED 只表示本轮执行停止且报告已签发，不表示产品全通过、缺陷修复或风险接受。
+- CLOSED 只表示本轮 AC/Case 已终态或归因、判定与缺口已登记且报告已签发，不表示产品全通过、缺陷修复或风险接受；证据完整性影响三态，不另行阻止 INTERIM 保底和 CLOSED。
 
 ## 3 用户结果、证据与技术观察
 
 - 判定同时刻留证；人类 GUI 用截图/DOM，TUI/CLI 用终端读屏/输出，人类 API 用调用方可见响应及最终业务结果，MACHINE 用调用方契约证据。
+- 启用 coverage profile 时，Run 主表一行一次执行，Run-Case 明细一行一个 Run×Case并逐断言留证；同 Case 以本轮同环境同判据的最新完整 FULL Run-Case 作基线；较晚 PARTIAL 只补充或降级，部分 ✅不整体翻绿，部分 ❌必须覆盖旧 ✅并阻止 Case/AC ✅，无完整基线时部分 ✅只能 PARTIAL。REVERIFY 以 reverify_of 核身份。AC 聚合主/次所有计划断言，次失败不得判 AC ✅。
+- 凡被计划 Run-Case、Case 状态、AC 判定、报告主证或覆盖分子引用的证据均须归格，改标 UNMAPPED_OBSERVATION 不能豁免；只有 EXPLORATORY、Case/AC/Cell=N/A 且无任何计划引用的观察才合法 UNMAPPED_OBSERVATION；普通无引用附件记 UNREFERENCED_ARTIFACT，均不机械改变三态但也零 credit。⏭️ 可凭存在性证据、BLOCKED 可凭归因证明闭合，不强迫伪造产品执行 Run。
 - 证据降级链：截图→DOM→NET→TIME；无法观察产品结果记 OBSERVABILITY_BLOCKED，已见结果但缺主证最高 PARTIAL，事后补证不升级原判定。
 - 标准冲突时实测照做、事实照取、相关 AC ⏸️，其他旅程继续；不临场改标准。
 - L1=旅程可用、L2=内容与数据正确、L3=边界/异常/恢复；按适用性和风险档选择边界、Pairwise、状态矩阵与共享字段去重。
@@ -167,7 +169,7 @@ metadata:
 | 7 | 产物按所选模式裁剪；SINGLE_WRITER 仍含逻辑四态/WAITING/一次性收判/超时，但无租约/CAS/多写者接管；格式缺口只降 INTERIM，不阻止保底报告 |
 | 8–11 | BLOCKED 六类归因及证明；任一 PARTIAL、OMITTED/BUDGET_EXHAUSTED 均 INTERIM；补测任务单齐；UNREACHABLE 有限证明 |
 | 12–14 | 每关键目标有连续基本流、交接与最终结果；场景完成与 AC 挂靠分开；无域批吞并；入口主证和 G0/SBTM 齐 |
-| 15–16 | 三指标按内联公式机算或手工对账；任务书只含所选执行模式，外部版本不热切换 |
+| 15–16 | 基础三指标按内联公式机算或手工对账；启用 profile 时另核 Cell/Case/Run 派生指标；任务书只含所选执行模式，外部版本不热切换 |
 | 17 | 页面/控件只作审计覆盖；P/O/S/G 不变量和稳定 ID 齐；不以控件数量代替旅程完成 |
 | 18 | 页面内容逐项落点或 N/A；TECH-OBS 与 UAT 缺陷分离 |
 | 19 | 传输文件与五要素齐；采集失败不阻止保底报告 |
@@ -175,14 +177,15 @@ metadata:
 | 21 | SINGLE_WRITER 核逻辑四态+长窗原地续跑+最小停止链：全部计划 AC DONE/BLOCKED、无待续/可执行独立项；PARALLEL_UNATTENDED 核 §6 状态机与双空；未 CLOSED 回合完成进度、登记、断点、收判或 N/A |
 | 22 | 中断动作三问与错误后 60 秒禁令齐 |
 | 23 | 判定·登记原子化，未登记判定清单为空 |
+| 24 | 启用 profile 时必需 Cell 全有主 Case；Run-ID 唯一、Run×Case 联合键唯一；同 Case 以最新完整 FULL Run-Case 作基线，部分 ✅不翻绿、部分 ❌必覆盖旧 ✅，AC 聚合主/次断言；计划 Case 全闭合，计划引用证据归格且改标签不豁免，BLOCKED/⏭️ 可按证据类型无执行 Run；无固定 Case 数或跨轮 credit |
 
 ## 6 报告：先用户结论，后审计证据
 
 - 报告第一节固定为**关键旅程结论**，逐条写「persona｜业务目标｜实际连续路径｜完成/失败/受阻｜用户可见结果｜主证」。不新增旅程通过率 KPI，不用覆盖数字替代定性目标结论。
-- 第二节为用户语言缺陷与残余风险；第三节才是需求覆盖率、UI 主证覆盖率、未触率、页面/控件矩阵、TECH-OBS 和产物清单。
+- 第二节为用户语言缺陷与残余风险；第三节才是需求覆盖率、UI 主证覆盖率、未触率、按需 Cell/Case 派生度量、页面/控件矩阵、TECH-OBS 和产物清单。
 - DOC 审计独立出 coverage-audit 报告，不进入 UAT FINAL/WITH-GAPS。
-- **三态共同前置**：所有计划产品 AC 均为 DONE 或六类 BLOCKED；SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。
-- 三态仍按 INTERIM→FINAL-WITH-GAPS→FINAL 判定：任一 PARTIAL、OMITTED/BUDGET_EXHAUSTED、主证/计划产物/控件要件缺口先 INTERIM；存在合法外部 BLOCKED、未裁定 ⏸️ 或合法 S/G 才 WITH-GAPS；完全无缺口才 FINAL；UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应主证必须 100%。❌ 不阻止 FINAL，全项有证据的 ❌ 也可 FINAL。
+- **三态共同前置**：所有计划产品 AC 均为 DONE 或六类 BLOCKED；启用 coverage profile 时计划 Case 也全部终态/归因闭合。SINGLE_WRITER 另核逻辑四态已落 execution-log、无待续/可执行独立项，不创建并行写者契约；PARALLEL_UNATTENDED 另核 READY=0、WAITING=0、DONE+BLOCKED=产品 AC 总数。
+- 三态仍按 INTERIM→FINAL-WITH-GAPS→FINAL 判定：任一 AC/Case PARTIAL、OMITTED/BUDGET_EXHAUSTED、主证/计划产物/控件要件缺口、计划 Case 映射/证据要件缺失或范围内孤儿证据被用作主证先 INTERIM；任一 AC/Case 存在合法外部 BLOCKED、未裁定 ⏸️或合法 S/G 才 WITH-GAPS；AC/Case 两层均 BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0且无其他缺口才 FINAL；UI PASS=0 时主证覆盖率=N/A+理由，UI PASS>0 时对应主证必须 100%。❌ 不阻止 FINAL，全项有证据的 ❌ 也可 FINAL。
 - 任何写树、命名、断链或预算问题仍须出保底报告：关键旅程结论、用户缺陷、逐 AC 状态、已有证据、偏差与下一步。不得写未授权目录。
 - 收口分执行结束、报告签发、风险接受、经验回灌；前两项完成即 CLOSED，后两项未答复不撤销报告。经验无项目写授权时只留建议。
 
@@ -191,6 +194,6 @@ metadata:
 - `reference/gui-tui-cli.md`：人类 GUI/TUI/CLI/API 与真机器入口边界。
 - `reference/boundary-derivation.md`、`method-coverage.md`：旅程深度、风险档、异常恢复和技术观察。
 - `reference/defect-classification.md`：用户语言缺陷、分类和 P 级。
-- `reference/artifact-conventions.md`：报告产物；§6.0 为所有模式共享的自主长任务内核，§6.1–6.4 的租约/CAS/fencing、物理队列、接管与收判包仅用于 PARALLEL_UNATTENDED。
+- `reference/artifact-conventions.md`：报告产物；§4.5 为按需 Cell/Case/Run 与复验归格；§6.0 为所有模式共享的自主长任务内核，§6.1–6.4 的租约/CAS/fencing、物理队列、接管与收判包仅用于 PARALLEL_UNATTENDED。
 - `reference/tool-selection.md`、`runbook.md`：真实入口驱动能力与失效降级。
 - 生成侧分工：ACG `references/skill-interface.md`；任务书运行时不得依赖该指针。

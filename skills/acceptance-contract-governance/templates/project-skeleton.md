@@ -15,6 +15,7 @@
 
 ## 3. 基线与夹具（数据层，<项目>/tests/fixtures/）
 - 端点基线 / 账号-角色矩阵（凭据引用密钥源，零明文）/ 夹具真值登记（纯色图 RGB/已知数据表等，回填对账基准）
+- 可选领域 coverage profile：维度/约束/Cell/Case 只作当前 test basis 的派生数据，版本化留 crosswalk；历史 Run/证据只作索引，不作为下轮 PASS 或生成基底
 
 ## 4. 机读台账（数据层，<项目>/tests/reports/）
 - bugQueue.json（缺陷队列）/ defects-tracker.md（人工镜像）/ execution-ledger.json（执行总账）

@@ -61,11 +61,86 @@ AUDIT 条目不进入本节四桶，独立报告已核/未核数；MIXED 先拆�
 
 **陷阱实证（某全域轮任务书审计）**：裸正则只抓首号，会把 `201~218` 误读为单点 201、把 `203/204` 误读为 203——曾致并集 94/128、假差集 34 项；按上法展开后为 127/128，唯一真差集 = 1 个漏标维度的 AC（书写缺口，1 点）。**本闸禁止裸正则上岗**（凡含正则的闸先一正一负活体测，见 SKILL.md Verification Checklist 总则）。
 
+## 3.3 按需业务覆盖 profile：Cell、Case、Run 与证据
+
+只要任一 AC 存在至少两个需联合判定的业务条件、显式判定表/状态转换、高风险组合、场景重分组，或需跨场景/复验归格，就必须在相应范围展开本节；触发看业务判定关系，不看 AC 文本拆分结果，禁止把联合判定拆成表面独立 AC 绕过。仅当全任务所有 AC 均无任一触发时才允许整书 N/A，并逐项留证明；混合任务中其余独立 AC 用隐式单格简并。业务维度、值和约束只存在于任务书实例，技能核心不得硬编码还款、权限、办单或任何行业字段。
+
+### 实体与身份
+
+| 实体 | 必备语义与稳定性 | 计数口径 |
+|---|---|---|
+| Cell-ID | 一个经约束裁剪后的有效条件组合；含来源、风险、选择方式、计划/候选归宿。语义或预期改变时新建并留 crosswalk | 只作设计覆盖格，不直接算执行通过 |
+| Case-ID | 一个可执行子用例；固定 **1 个主 Cell+1 个主 AC**，另有数据/前置/步骤/预期。可有次 Cell/次 AC，但须逐断言映射 | 每个唯一 Case 只计一次执行子用例；次关联不重复计数 |
+| S-ID | 真实 persona 连续旅程及步骤映射 | 不是组合覆盖主键；场景重排只改映射，不改 Cell/Case/AC |
+| Run-ID | Run 主表一行一次实际执行，含 run_kind、reverify_of、环境、判据哈希和时间；Run-ID 唯一，不写跨 Case 总 verdict | REVERIFY 链接原 Run，复用原 Case/AC并新建本轮 Run，不生成新设计覆盖 |
+| Run-Case 明细 | 一行一个 `Run-ID×Case-ID`，含主 AC/主 Cell、逐断言 verdict 和证据；联合键唯一 | 允许一个 Run 多 Case，但每个 Case 独立判定；无产品执行的 ⏭️/BLOCKED 可在 Case 状态表以 Run=N/A 闭合 |
+| Evidence | 引用 Run-Case 联合键及 assertion；无产品执行的 ⏭️/BLOCKED 引用 Case 状态记录和归因/存在性证明 | 无有效映射不得提供覆盖 credit；文件数量不等于 Case 数 |
+
+ID 建议采用 `CELL-/CASE-/RUN-<域>-<序号>` 等稳定键，Case/Cell 不嵌入 S-ID、日期或 REVERIFY 前缀；Run 可另带时间戳。AC 子字母仍只用于验收点插项，不得充当 Case 变体。`AC=Case` 是未启用整书时的隐式单 Cell/单 Case 计数简并，不要求虚构显式 Cell 文档；混合任务中的独立 AC 也以隐式单格纳入统一对账，不得出现无主 Cell 的显式 Case。
+
+一个 Cell 可由多个 Case 支撑，一个主 AC 也可由多个 Case 支撑；同一主 AC 不得用单个通过样本吞掉其他计划 Case 或次断言。AC/Case 当前判定必须聚合所有主/次关联断言，并保留其余未闭合项，禁止选择性取样。
+
+### 生成与选择契约
+
+1. **维度表**：`dimension | values | source | constraints/applicability`；每维取值必须来自当前 test basis/现行侦察，约束裁剪须留来源，禁止为了凑数制造非法组合。
+2. **Cell 表**：`Cell-ID | condition tuple | source | risk | selection | PLANNED/CANDIDATE/EXCLUDED+理由`。安全、越权、资金、不可逆项，以及关键档/高风险的边界、非法转换和明确拒绝格按计划强制项处理；普通边界、普通拒绝格和其他高维组合可按风险进入 Pairwise 或 CANDIDATE，Pairwise 标「非穷尽」，候选格进入残余风险，不得重新制造指数级全量。
+3. **Case 表**：`Case-ID | primary Cell | primary AC | secondary Cell/AC+断言 | S-ID/步骤 | 数据/前置 | 预期`。每个必需 Cell 至少一个主 Case；缺一格即生成返工。Case 数由已选 Cell 和必要数据实例派生，**禁止先定 31/64 等数量再倒推覆盖**。
+4. **计划锁定**：执行前冻结必需 Cell、计划 Case、主 AC 和选择理由；新增实测观察不得静默改计划分母。范围/test basis 改变回生成侧修订，候选未选项不冒充 OMITTED。
+5. **D1 至 D11 与业务矩阵正交**：前者回答使用哪些测试技术与深度，后者回答哪些业务条件组合被选中；不得用十一维打勾替代 Cell 归格，也不得用 Cell 数量替代内容保真、权限或安全深度。
+
+### 执行、复验与阻塞归格
+
+- **Run 主表**：一行一次执行，`Run-ID | run_kind | reverify_of | environment | criteriaHash | observed_at`；Run-ID 唯一，run_kind 仅 INITIAL/REVERIFY/EXPLORATORY，不写跨 Case 总 verdict。
+- **Run-Case 明细**：一行一个 `Run-ID×Case-ID`，联合键唯一，记录主 AC/主 Cell、`AC-ID#assertion=verdict` 集合和证据；一个 Run 可服务多个 Case，但每个 Case 独立 verdict/evidence，禁止单行多值 Case 或共享一个总判定。Evidence 引用联合键+assertion，重复复用也须逐断言登记。
+- **Case 状态表**：`Case-ID | currentRun-ID/N/A | current verdict | proof/解除条件`。✅/❌/PARTIAL/⏸️ 必须有实际 Run-Case 和对应主证；⏭️ 可以无产品执行 Run但须有存在性/通道证据；BLOCKED 可以 Run=N/A，以归因证明和解除条件闭合，DEFERRED/OMITTED 不得被迫伪造执行 Run。
+- **当前有效 Run 与部分复验**：同一冻结 Case、同环境和判据哈希下，以本轮 observed_at 最新且映射/主证要件完整的 **FULL Run-Case** 作为当前基线；用于整体替换基线的复验必须覆盖该 Case 全部计划断言。较晚 PARTIAL Run-Case 只补充或降级当前断言，部分 ✅不得把旧 ❌整体翻绿，但任何有效部分 ❌必须覆盖旧 ✅并阻止对应 Case/AC ✅，其他 PARTIAL/⏸️/BLOCKED 也按优先级进入报告。Case 状态指针保留最新完整基线 Run，后续部分 Run-Case 和断言明细全部入台账；无完整基线时部分 ✅只能形成 PARTIAL，不得伪装完整通过。所有 Run 保留，INITIAL❌→FULL REVERIFY✅可取后者，INITIAL❌→PARTIAL ✅仍取 ❌，INITIAL✅→FULL/PARTIAL ❌均取 ❌；无效新 Run 只记缺口，不能任意挑选旧结论。
+- **REVERIFY 身份**：`reverify_of` 指向原 Run；每条新 Run-Case 必须与原 Run 中同 Case 明细的 AC/Cell 一致，原 Run 可含其他 Case，复验可选子集但不得改变身份。跨轮原 Run 只作身份索引，当前判定和 credit 只来自本轮有效 Run。
+- **证据与次关联**：证据可复用，但每次复用须映射到相同事实支持的断言；多条件同时命中时，次 AC 只有在结果能区分其独立贡献或另有独立可观察断言时才可挂接，若结果已能由主条件完全解释，只归主因，不得叠加次规则 credit。改 S-ID、报告目录或文件名均不改变 Case 身份。
+- **引用决定证据分类**：凡被计划 Run-Case、Case 状态、AC 判定、报告主证表或覆盖分子引用的证据，均为计划关联证据，必须完整归格；事后改标 `UNMAPPED_OBSERVATION` 或撤销声明不能豁免。只有 run_kind=EXPLORATORY、Case/AC/Cell=N/A 且无任何计划引用的观察，才是合法 UNMAPPED_OBSERVATION；非 EXPLORATORY 且完全无计划引用的普通附件记 UNREFERENCED_ARTIFACT，也不得提供 credit，但同样不机械改变三态。任何附件一旦被计划引用即自动重归待归格证据，映射不全为孤儿、零 credit，充作主证则 INTERIM。
+- **阻塞与探索**：已点名的复杂/高风险分支必须有 Cell/AC/Case 或合法 EXCLUDED 依据；BLOCKED 挂在具体 Case，保留归因、解除条件和残余风险。探索发现属于当前范围且确认需要新增覆盖时，转生成侧评审并列探索转化债务，未转化前不得宣称该域覆盖完整；候选未选项不冒充 OMITTED。
+- **CLOSED 与报告解耦**：CLOSED 只要求 AC/Case 均终态或有归因 BLOCKED、判定登记完成、缺口已记录、保底报告已签发；证据完整性影响三态，不再作为额外 CLOSED 条件。执行期新发现设计缺 Cell/Case 时登记生成缺陷，能映射则映射并归因，不能修复则 INTERIM+CLOSED，不制造无出口。仍 READY 的 Case 先续跑，无法续跑则转有归因 BLOCKED后再报告。
+
+### 当前断言与 AC 聚合
+
+Case 先聚合自身全部计划断言，AC 再聚合所有以它为**主或次 AC** 的计划断言；次断言不增加 Case 分母，但其当前失败必须阻止对应 AC ✅。用于 AC 展示的优先级如下，未被选中的状态仍保留在断言/Case 台账并参与报告，不得丢弃：
+
+| 当前断言集合 | AC 展示状态 | 报告处理要点 |
+|---|---|---|
+| 任一 ❌ | ❌ | 产品反例成立；其余 PARTIAL/BLOCKED/⏸️ 仍分别决定 INTERIM/WITH-GAPS |
+| 无 ❌，任一 PARTIAL | PARTIAL | INTERIM |
+| 无 ❌/PARTIAL，任一 ⏸️ | ⏸️ | 要件齐可 WITH-GAPS，缺要件 INTERIM |
+| 无上述，任一 BLOCKED | BLOCKED（可为混合通过+阻塞） | 不得写成 PARTIAL；MIXED 必须附完整 cause 集合/断言链接，缺明细保守 INTERIM，含 BUDGET/OMITTED 必 INTERIM，其余按类别判定 |
+| 无上述，任一 ⏭️ | ⏭️ | 可闭合并可按原三态 FINAL，但不计执行覆盖，不宣称领域验证完整 |
+| 全部相关计划断言均 ✅ | ✅ | 只有这一情形允许 AC ✅；次断言失败或未闭合不得豁免 |
+
+报告三态同时检查**计划 AC 与计划 Case 两个集合**：任一 PARTIAL、OMITTED/BUDGET_EXHAUSTED、映射/主证要件缺口→INTERIM；未裁定 ⏸️ 要件缺失→INTERIM，要件齐→WITH-GAPS；任一合法外部 BLOCKED→WITH-GAPS。❌/⏭️ 不单独阻止 FINAL，但任一 AC 或 Case 的残余 BLOCKED/⏸️ 都不能被另一层 ✅ 吞掉；FINAL 要求两层 BLOCKED=0、PARTIAL=0、未裁定 ⏸️=0且证据要件完整。基础未触率仍只按原 AC 公式计算。
+
+### 派生度量（不与基础三度量混用）
+
+**必需 Cell**=计划锁定的 PLANNED Cell，包含高风险 MANDATORY 与本轮选中的 Pairwise/边界/状态格；CANDIDATE/EXCLUDED 不进入其分母，但分别保留残余风险或排除理由，禁止执行后改列以美化指标。
+
+| 度量 | 公式/清单 | 口径 |
+|---|---|---|
+| 必需格归格率 | 至少有 1 个主 Case 的必需 Cell 数 / 必需 Cell 总数 | 生成期应=100%；分母 0 时 N/A+未启用理由 |
+| 计划子用例执行覆盖率 | 当前有效 Run-Case 有本轮有效产品验证的唯一计划 Case 数 / 计划 Case 总数 | ✅/❌/PARTIAL/⏸️可计入；同一 Case 多 Run 只计一次，⏭️、BLOCKED 和无映射证据不计；不是产品质量及格线 |
+| 计划子用例闭合率 | 已达本轮终态或六类 BLOCKED 的计划 Case 数 / 计划 Case 总数 | 报告共同前置=100%；外部阻塞仍按既有三态处理 |
+| 高风险未覆盖格 | 无有效执行证据的必需高风险 Cell 清单 | 必须逐格展示 Cell/Case/原因/解除条件，不得被平均覆盖率隐藏 |
+| 孤儿证据数 | 被任一计划 Run-Case、Case 状态、AC 判定、报告主证表或覆盖分子引用但缺有效映射的证据数 | 覆盖 credit=0，改标签不豁免；无任何计划引用的合法探索观察另列，不混入分子 |
+| 探索转化债务 | 范围内已确认新风险但未完成 Cell/AC/Case 评审的观察数 | 阻止「该域覆盖完整」声明，不反向篡改已冻结任务书执行结论 |
+
+`⏭️` 可闭合 Case 但不计执行覆盖率，高风险未覆盖格须单列其「有证据未实现/不适用」性质；它仍可按原三态进入 FINAL，但不得据此宣称领域产品验证完整。`❌` 有有效产品验证，不属于未覆盖格，只表示产品结果不满足预期。BLOCKED、未执行与 ⏭️ 不得混写成同一种产品或执行结论。
+
+持续维护的是当前维度模型、映射和未覆盖债务，不是继承历史 PASS。每轮仍从当前 test basis 重建冻结快照；历史 profile/报告仅在独立治理/crosswalk 中作派生对照，不作生成基底，历史证据不自动成为本轮证据，禁止跨轮拼接任何上述比例。
+
 ## 4. 反 gaming 与禁用口径
 
 - **产品质量不设及格线**：需求覆盖率只报数，不设「≥X% 产品通过」线——产品未实现会压低需求覆盖率，设线只会逼虚标 ⏭️/乱挂 ⏸️。**唯一例外是证据完整性**：UI PASS 必须有判定时 UI 主证，这是报告可信度合规闸，不是产品质量分数，也不要求功能全 PASS；
 - ⏭️ 虚标拦截 = §2 出处+证据双要件；⏸️ 虚标拦截 = §2 登记表要件；桶位无效视同纯未覆盖（返工）；
 - 禁止以历史任务书的需求条数为分母（派生口径不作 basis）；禁止跨轮拼接覆盖率；禁止把 ⏭️ 计入需求覆盖率分子（§1）。
+- 禁止以 AC 数、场景数、截图数或 REVERIFY 数冒充业务组合覆盖；禁止把 Pairwise 样本写成穷尽组合，禁止先指定子用例总数再倒推 Cell。
+- 禁止一次执行向多个 Case/AC 重复计数而无逐断言映射；主 Case/主 AC 用于去重，次关联必须能指出共享事实支持的不同断言。
+- 禁止将范围内孤儿证据计入任何覆盖分子，禁止将未归格 BLOCKED、待验或探索观察写成已覆盖；合法外部缺口可以 FINAL-WITH-GAPS，但不得写成无缺口。
+- 禁止以 UNMAPPED_OBSERVATION 标签覆盖既有计划引用，禁止忽略次断言失败，禁止绕过最新完整基线与部分 Run 时序选择有利的旧判定；所有历史 Run 留痕，当前判定只按冻结时序规则聚合。
 
 ## 5. 设计期 vs 执行期分工总表
 
